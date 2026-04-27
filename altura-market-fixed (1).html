@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Altura Market</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090b;--bg1:#111113;--bg2:#18181b;--bg3:#27272a;
+  --line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.04);
+  --t0:#fafafa;--t1:#d4d4d8;--t2:#a1a1aa;--t3:#52525b;
+  --g:#9ddb5e;--g2:rgba(157,219,94,.1);
+  --amber:#e0b84a;--red:#cc4a4a;--blue:#4a8ccc;
+  --accent:var(--g);--accent2:var(--g2);--accentRGB:157,219,94;
+  --mono:'SF Mono','Fira Mono',monospace;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t0);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:16px;-webkit-font-smoothing:antialiased;user-select:none}
+
+/* LAYOUT */
+#app{height:100vh;display:flex;flex-direction:column;position:relative}
+.screen{position:absolute;inset:0;bottom:72px;overflow-y:auto;overflow-x:hidden;
+  display:none;flex-direction:column;background:var(--bg);-webkit-overflow-scrolling:touch}
+.screen.active{display:flex}
+#screen-signin{bottom:0;justify-content:center;align-items:center;padding:28px 24px}
+
+/* NAV */
+#nav{position:fixed;bottom:0;left:0;right:0;z-index:200;height:72px;
+  background:rgba(9,9,11,.94);backdrop-filter:blur(24px);border-top:1px solid var(--line);
+  display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;background:none;border:none;cursor:pointer;color:var(--t3);
+  transition:color .15s;font-family:inherit;padding:0;position:relative}
+.nb.on{color:var(--accent)}
+.nb svg{width:22px;height:22px}
+.nb span{font-size:10px;font-weight:500}
+.nbadge{position:absolute;top:6px;right:calc(50% - 18px);background:var(--accent);
+  color:#09090b;border-radius:8px;font-size:9px;font-weight:800;padding:1px 5px;
+  min-width:16px;text-align:center;display:none}
+
+/* COMPONENTS */
+.ph{font-size:28px;font-weight:700;letter-spacing:-.04em}
+.slabel{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--t3);
+  text-transform:uppercase;margin-bottom:10px}
+.card{background:var(--bg1);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.crow{display:flex;align-items:center;gap:12px;padding:14px 16px;
+  border-bottom:1px solid var(--line2);cursor:pointer;transition:background .08s}
+.crow:last-child{border-bottom:none}
+.crow:active{background:var(--bg2)}
+.cicon{width:40px;height:40px;border-radius:10px;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.cinfo{flex:1;min-width:0}
+.ctitle{font-size:14px;font-weight:600;color:var(--t0)}
+.csub{font-size:12px;color:var(--t3);margin-top:2px}
+.cright{font-size:13px;color:var(--t3);flex-shrink:0}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
+  border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.04em}
+.pg{background:var(--g2);border:1px solid rgba(157,219,94,.2);color:var(--g)}
+.pa{background:rgba(224,184,74,.1);border:1px solid rgba(224,184,74,.2);color:var(--amber)}
+.pr{background:rgba(204,74,74,.1);border:1px solid rgba(204,74,74,.2);color:var(--red)}
+.pdot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.mono{font-family:var(--mono)}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:15px;
+  font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .1s}
+.btn:active{opacity:.85}
+.btn-p{background:var(--accent);color:#09090b}
+.btn-s{background:var(--bg2);color:var(--t1);border:1px solid var(--line)}
+.btn-g{background:none;border:none;color:var(--t2);padding:12px;font-family:inherit;cursor:pointer}
+.inp{width:100%;background:var(--bg1);border:1px solid var(--line);border-radius:12px;
+  padding:13px 15px;color:var(--t0);font-size:15px;font-family:inherit;outline:none;
+  transition:border-color .15s}
+.inp:focus{border-color:rgba(var(--accentRGB),.4)}
+.inp::placeholder{color:var(--t3)}
+.tog{width:44px;height:26px;border-radius:13px;background:var(--bg3);border:none;
+  cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--accent)}
+.tog::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;
+  background:#fff;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.tog.on::after{transform:translateX(18px)}
+.hdr{padding:16px 20px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.av{width:36px;height:36px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer}
+.sec{padding:0 16px;margin-bottom:18px}
+
+/* TOAST */
+#toast{position:fixed;top:12px;left:12px;right:12px;z-index:9999;background:var(--bg1);
+  border:1px solid var(--line);border-radius:16px;padding:13px 16px;
+  display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.6);
+  transform:translateY(calc(-100% - 20px));transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+#toast.show{transform:translateY(0)}
+
+/* SHEETS */
+.sbd{position:fixed;inset:0;z-index:400;background:rgba(9,9,11,.75);display:none;
+  align-items:flex-end;backdrop-filter:blur(4px)}
+.sbd.show{display:flex}
+.sp{width:100%;background:var(--bg1);border-radius:24px 24px 0 0;
+  border-top:1px solid var(--line);max-height:92vh;overflow-y:auto;
+  animation:shu .25s cubic-bezier(.4,0,.2,1)}
+@keyframes shu{from{transform:translateY(32px);opacity:0}to{transform:none;opacity:1}}
+.sh{width:36px;height:4px;border-radius:2px;background:var(--bg3);margin:14px auto 0}
+.stitle{font-size:18px;font-weight:700;letter-spacing:-.02em;padding:14px 20px 10px}
+
+/* QR */
+#qrov{position:fixed;inset:0;z-index:600;background:rgba(9,9,11,.97);display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#qrov.show{display:flex}
+.qrcard{background:#fff;padding:22px;border-radius:20px;display:flex;
+  flex-direction:column;align-items:center;gap:10px}
+
+/* STORE CARD */
+.stcard{margin:0 16px 16px;border-radius:16px;overflow:hidden;
+  background:var(--bg1);border:1px solid var(--line)}
+.stbody{padding:18px 20px 16px}
+.stfoot{border-top:1px solid var(--line2);padding:11px 20px;display:flex;gap:18px;
+  font-size:12px;color:var(--t3)}
+.stnm{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:6px 0 4px}
+.stadr{font-size:12px;color:var(--t3);margin-bottom:14px}
+.wbtn{width:100%;padding:13px 20px;border:none;border-radius:12px;background:var(--accent);
+  color:#09090b;font-size:15px;font-weight:700;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;gap:8px;font-family:inherit}
+
+/* WEEK */
+.wgrid{display:grid;grid-template-columns:1fr 1fr 1fr}
+.wcell{padding:14px 12px;text-align:center}
+.wcell+.wcell{border-left:1px solid var(--line2)}
+.wval{font-size:21px;font-weight:700;font-family:var(--mono);letter-spacing:-.03em}
+.wkey{font-size:9px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
+
+/* BASKET */
+.btotal{font-size:40px;font-weight:700;letter-spacing:-.05em;font-family:var(--mono)}
+.bitem{display:flex;align-items:center;gap:11px;padding:11px 16px;
+  border-bottom:1px solid var(--line2);animation:fds .15s ease}
+@keyframes fds{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.bitem:last-child{border-bottom:none}
+.bemo{width:44px;height:44px;border-radius:10px;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.binfo{flex:1;min-width:0}
+.bname{font-size:14px;font-weight:500}
+.bsub{font-size:10px;color:var(--t3);margin-top:2px;font-family:var(--mono)}
+.bprice{font-family:var(--mono);font-size:14px;font-weight:600}
+.qc{display:flex;align-items:center;gap:8px}
+.qb{width:28px;height:28px;border-radius:8px;background:var(--bg3);border:none;
+  color:var(--t1);font-size:16px;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;font-family:inherit;transition:background .1s}
+.qb:active{background:var(--accent);color:#09090b}
+.qv{font-family:var(--mono);font-size:14px;font-weight:600;min-width:20px;text-align:center}
+.bempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;padding:48px 32px;text-align:center}
+.cobar{padding:10px 16px 12px;background:linear-gradient(to top,var(--bg) 70%,transparent);
+  position:sticky;bottom:0}
+
+/* SHOP */
+.srow{display:flex;align-items:center;gap:10px;margin:0 16px 12px;
+  background:var(--bg1);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+.srow svg{width:16px;height:16px;color:var(--t3);flex-shrink:0}
+.srow input{flex:1;background:none;border:none;outline:none;font-size:15px;
+  color:var(--t0);font-family:inherit}
+.cbar{display:flex;gap:7px;overflow-x:auto;padding:0 16px 12px;scrollbar-width:none}
+.cbar::-webkit-scrollbar{display:none}
+.cbtn{flex-shrink:0;padding:7px 14px;border-radius:20px;background:var(--bg2);
+  border:1px solid var(--line);color:var(--t2);font-size:13px;font-weight:500;
+  cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .12s}
+.cbtn.on{background:var(--accent2);border-color:rgba(var(--accentRGB),.25);color:var(--accent)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 16px}
+.pcard{background:var(--bg1);border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;cursor:pointer;transition:border-color .12s}
+.pcard:active{border-color:var(--accent)}
+.pcard.oos{opacity:.5;pointer-events:none}
+.pimg{height:88px;display:flex;align-items:center;justify-content:center;
+  font-size:40px;background:var(--bg2);position:relative}
+.oosbadge{position:absolute;bottom:5px;right:5px;background:rgba(204,74,74,.9);
+  color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.04em}
+.pbody{padding:10px 12px 12px}
+.pname{font-size:13px;font-weight:600;margin-bottom:2px;line-height:1.3}
+.porg{font-size:10px;color:var(--t3);font-family:var(--mono);margin-bottom:6px}
+.ppr{display:flex;align-items:center;justify-content:space-between}
+.pprice{font-size:15px;font-weight:700;font-family:var(--mono)}
+.pold{font-size:12px;color:var(--t3);text-decoration:line-through;margin-left:3px}
+.abtn{width:30px;height:30px;border-radius:9px;background:var(--accent);border:none;
+  color:#09090b;font-size:20px;font-weight:700;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;transition:opacity .1s}
+.abtn:active{opacity:.7}
+.abtn.ib{background:var(--bg2);color:var(--accent);border:1px solid rgba(var(--accentRGB),.3);font-size:13px}
+
+/* DETAIL SHEET */
+.dimg{height:150px;display:flex;align-items:center;justify-content:center;font-size:68px;background:var(--bg2)}
+.dbody{padding:18px 20px}
+.dname{font-size:21px;font-weight:700;letter-spacing:-.02em;margin-bottom:3px}
+.dorg{font-size:12px;color:var(--t3);font-family:var(--mono);margin-bottom:12px}
+.dprice{font-size:28px;font-weight:700;font-family:var(--mono);color:var(--accent);margin-bottom:14px}
+.ngrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:16px}
+.nc{background:var(--bg2);border-radius:10px;padding:9px 7px;text-align:center}
+.nv{font-size:15px;font-weight:700;font-family:var(--mono)}
+.nk{font-size:9px;color:var(--t3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+.atag{display:inline-block;background:rgba(224,184,74,.1);border:1px solid rgba(224,184,74,.2);
+  color:var(--amber);border-radius:6px;font-size:11px;padding:2px 8px;margin:2px}
+.dqrow{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.dqb{width:36px;height:36px;border-radius:10px;background:var(--bg2);
+  border:1px solid var(--line);color:var(--t1);font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-family:inherit}
+.dqv{font-size:18px;font-weight:700;font-family:var(--mono);min-width:28px;text-align:center}
+.notbtn{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);
+  border:1px solid var(--line);border-radius:8px;padding:6px 12px;
+  font-size:12px;color:var(--t2);cursor:pointer;font-family:inherit;margin-bottom:14px}
+.notbtn.on{border-color:rgba(var(--accentRGB),.3);color:var(--accent);background:var(--accent2)}
+
+/* OFFERS */
+.ofcard{background:var(--bg1);border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;margin:0 16px 10px;display:flex}
+.ofimg{width:78px;display:flex;align-items:center;justify-content:center;
+  font-size:34px;background:var(--bg2);flex-shrink:0}
+.ofbody{padding:13px;flex:1}
+.ofnm{font-size:14px;font-weight:600;margin-bottom:3px}
+.ofpr{display:flex;align-items:baseline;gap:7px;margin-bottom:4px}
+.ofp{font-size:17px;font-weight:700;font-family:var(--mono);color:var(--accent)}
+.ofo{font-size:12px;color:var(--t3);text-decoration:line-through;font-family:var(--mono)}
+.ofsv{display:inline-block;background:var(--accent2);border:1px solid rgba(var(--accentRGB),.2);
+  color:var(--accent);border-radius:4px;font-size:10px;font-weight:700;padding:2px 6px;margin-bottom:4px}
+.ofex{font-size:11px;color:var(--t3);font-family:var(--mono)}
+
+/* HISTORY */
+.hmon{padding:8px 20px;font-size:11px;font-weight:700;letter-spacing:.08em;
+  color:var(--t3);text-transform:uppercase}
+.hitem{padding:13px 20px;border-bottom:1px solid var(--line2);
+  display:flex;align-items:center;gap:12px;cursor:pointer}
+.hitem:active{background:var(--bg2)}
+.hico{font-size:22px;width:44px;height:44px;border-radius:12px;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center}
+.hinfo{flex:1;min-width:0}
+.hnm{font-size:14px;font-weight:600}
+.hdt{font-size:11px;color:var(--t3);margin-top:2px}
+.hemo{font-size:12px;margin-top:3px}
+.hamt{font-family:var(--mono);font-size:15px;font-weight:700}
+
+/* ANALYTICS */
+.cbars{display:flex;align-items:flex-end;gap:5px;height:90px}
+.cbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.abar{width:100%;border-radius:4px 4px 0 0;background:var(--accent);min-height:4px;opacity:.8;transition:height .3s}
+.abar.td{opacity:1}
+.clbl{font-size:9px;color:var(--t3);font-family:var(--mono)}
+.mrow{display:flex;align-items:center;gap:8px}
+.mdot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.mnm{font-size:12px;color:var(--t2);flex:1}
+.mpct{font-size:12px;font-weight:700;font-family:var(--mono)}
+
+/* PROFILE */
+.phero{padding:20px 20px 12px;display:flex;align-items:center;gap:16px}
+.pav{width:64px;height:64px;border-radius:18px;background:var(--bg2);
+  border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;
+  font-size:32px;flex-shrink:0}
+.pnm{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.pem{font-size:12px;color:var(--t3);font-family:var(--mono);margin-top:2px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 16px 16px}
+.scard{background:var(--bg1);border:1px solid var(--line);border-radius:12px;padding:13px 10px;text-align:center}
+.sv{font-size:21px;font-weight:700;font-family:var(--mono);letter-spacing:-.03em}
+.sk{font-size:9px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
+
+/* FLOOR MAP */
+.fmap{position:relative;margin:0 16px;border-radius:12px;background:var(--bg1);
+  border:1px solid var(--line);height:240px;overflow:hidden}
+.mzone{position:absolute;border-radius:6px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;font-size:10px;color:var(--t2);
+  border:1px solid var(--line2);cursor:pointer}
+.mzone.hl{border-color:var(--accent);background:var(--accent2);color:var(--accent)}
+.mzico{font-size:17px}
+.myou{position:absolute;width:13px;height:13px;border-radius:50%;background:var(--accent);
+  border:2px solid #fff;box-shadow:0 0 0 3px rgba(var(--accentRGB),.3)}
+</style>
+</head>
+<body>
+
+<!-- HTML STRUCTURE -->
+<!-- SIGNIN -->
+<div id="ss" class="screen" style="bottom:0;justify-content:center;align-items:center;padding:28px 24px;overflow-y:auto">
+  <div style="font-size:50px;margin-bottom:8px">🛒</div>
+  <div style="font-size:25px;font-weight:700;letter-spacing:-.03em;margin-bottom:4px">Altura Market</div>
+  <div style="font-size:14px;color:var(--t3);margin-bottom:28px;text-align:center;line-height:1.6">Sign in with your Altura ID<br>or create one to get started.</div>
+  <div id="sid" style="display:none;width:100%;background:var(--g2);border:1px solid rgba(157,219,94,.2);border-radius:12px;padding:13px 16px;margin-bottom:14px;font-size:13px;color:var(--t1);text-align:center;line-height:1.5"></div>
+  <input class="inp" id="sn" type="text" placeholder="Your name" style="margin-bottom:10px"/>
+  <input class="inp" id="se" type="email" placeholder="Email address" style="margin-bottom:10px"/>
+  <input class="inp" id="sa" type="text" placeholder="Avatar emoji (e.g. 🔭)" maxlength="4" style="margin-bottom:10px"/>
+  <select class="inp" id="sr" style="margin-bottom:18px;appearance:auto"></select>
+  <button class="btn btn-p" onclick="signIn()" style="margin-bottom:12px">Continue with Altura ID</button>
+  <div style="font-size:12px;color:var(--t3);text-align:center;line-height:1.9">
+    Already have Altura Search?<br>
+    <span onclick="importFromSearch()" style="color:var(--accent);cursor:pointer;text-decoration:underline">Import your Altura ID →</span>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="sc-home" class="screen">
+  <div class="hdr"><div class="ph">Market</div><div class="av" id="hav" onclick="goTo('profile')"></div></div>
+  <!-- Store card -->
+  <div class="stcard">
+    <div class="stbody">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+        <span class="pill" id="spill"></span><span style="font-size:12px;color:var(--t3)" id="sctime"></span>
+      </div>
+      <div class="stnm" id="snm"></div><div class="stadr" id="sadr"></div>
+      <button class="wbtn" onclick="showQR()">🚪 Show walk-in code</button>
+    </div>
+    <div class="stfoot" id="sfoot"></div>
+  </div>
+  <!-- Week stats -->
+  <div class="sec"><div class="card"><div class="wgrid">
+    <div class="wcell"><div class="wval" id="wsp">$0</div><div class="wkey">This week</div></div>
+    <div class="wcell"><div class="wval" id="wvi">0</div><div class="wkey">Visits</div></div>
+    <div class="wcell"><div class="wval" id="wit">0</div><div class="wkey">Items</div></div>
+  </div></div></div>
+  <!-- Basket preview -->
+  <div class="sec" id="hbs"><div class="slabel">Current basket</div><div class="card" id="hbp"></div></div>
+  <!-- Kitchen menu -->
+  <div class="sec"><div class="slabel">Today's kitchen</div><div class="card" id="hmenu"></div></div>
+  <!-- Offers -->
+  <div id="hos" style="margin-bottom:18px"><div class="slabel" style="padding:0 16px">This week's offers</div><div id="hof"></div></div>
+  <!-- Reorder -->
+  <div class="sec"><div class="slabel">Order again</div><div class="card" id="hro"></div></div>
+  <!-- New arrivals -->
+  <div class="sec" id="hns"><div class="slabel">New at this store</div><div class="card" id="hna"></div></div>
+</div>
+
+<!-- BASKET -->
+<div id="sc-basket" class="screen">
+  <div style="padding:16px 20px 10px;flex-shrink:0">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--t3);text-transform:uppercase;margin-bottom:4px;font-family:var(--mono)">Basket total</div>
+    <div class="btotal" id="bt">$0.00</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+      <span class="pill pg"><span class="pdot"></span> Live</span>
+      <button onclick="showMap()" style="background:none;border:none;color:var(--t3);font-size:12px;cursor:pointer">🗺 Floor map</button>
+    </div>
+  </div>
+  <div class="card" style="margin:0 16px" id="bc">
+    <div class="bempty" id="bem">
+      <div style="font-size:48px;opacity:.3">🧺</div>
+      <div style="font-size:15px;font-weight:500;color:var(--t2)">Your basket is empty</div>
+      <div style="font-size:13px;color:var(--t3);margin-top:4px">Browse the shop or use Order Again.</div>
+    </div>
+  </div>
+  <div class="cobar" id="cobar" style="display:none">
+    <button class="btn btn-p" onclick="openCO()" style="display:flex;justify-content:space-between;padding:16px 20px">
+      <span>Checkout</span><span class="mono" id="cot">$0.00</span></button>
+  </div>
+</div>
+
+<!-- SHOP -->
+<div id="sc-shop" class="screen" style="padding-bottom:0">
+  <div class="hdr"><div class="ph">Shop</div></div>
+  <div class="srow"><svg viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <input id="ssearch" type="text" placeholder="Search products…" oninput="filterSearch()"/></div>
+  <div class="cbar" id="catbar"></div>
+  <div class="pgrid" id="pgrid" style="padding-bottom:20px;padding-top:4px"></div>
+</div>
+
+<!-- HISTORY -->
+<div id="sc-history" class="screen">
+  <div class="hdr"><div class="ph">History</div></div>
+  <div id="hlist"></div>
+</div>
+
+<!-- PROFILE -->
+<div id="sc-profile" class="screen">
+  <div class="hdr"><div class="ph">Account</div></div>
+  <div class="phero">
+    <div class="pav" id="pav"></div>
+    <div><div class="pnm" id="pnm"></div><div class="pem" id="pem"></div>
+    <div style="font-size:11px;color:var(--accent);margin-top:3px;cursor:pointer" onclick="openRegSwitcher()" id="preg"></div></div>
+  </div>
+  <div class="sgrid">
+    <div class="scard"><div class="sv" id="sv">0</div><div class="sk">Visits</div></div>
+    <div class="scard"><div class="sv" id="ssp">$0</div><div class="sk">Spent</div></div>
+    <div class="scard"><div class="sv" id="sit">0</div><div class="sk">Items</div></div>
+  </div>
+  <!-- Analytics -->
+  <div class="sec"><div class="slabel">Spending this week</div>
+    <div class="card" style="padding:16px"><div class="cbars" id="abars"></div></div></div>
+  <div class="sec"><div class="slabel">By category</div>
+    <div class="card" style="padding:14px 16px"><div id="acats"></div></div></div>
+  <div class="sec"><div class="slabel">Most purchased</div><div class="card" id="atop"></div></div>
+  <!-- Prefs -->
+  <div class="sec"><div class="slabel">Preferences</div>
+    <div class="card">
+      <div class="crow" onclick="tglPref('nutrition')"><div class="cinfo"><div class="ctitle">Nutritional tracking</div><div class="csub">Show on receipts</div></div><button class="tog" id="tg-nutrition"></button></div>
+      <div class="crow" onclick="tglPref('reorder')"><div class="cinfo"><div class="ctitle">Smart reorder</div><div class="csub">Suggest from history</div></div><button class="tog" id="tg-reorder"></button></div>
+      <div class="crow" onclick="tglPref('notifs')"><div class="cinfo"><div class="ctitle">Receipt notifications</div><div class="csub">After each shop</div></div><button class="tog" id="tg-notifs"></button></div>
+    </div>
+  </div>
+  <!-- Dietary -->
+  <div class="sec"><div class="slabel">Dietary filters</div>
+    <div class="card" style="padding:14px 16px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="cbtn" data-diet="vegetarian" onclick="tglDiet('vegetarian')">🥦 Vegetarian</button>
+        <button class="cbtn" data-diet="gluten-free" onclick="tglDiet('gluten-free')">🌾 Gluten-free</button>
+      </div>
+    </div>
+  </div>
+  <!-- Account -->
+  <div class="sec"><div class="slabel">Account</div>
+    <div class="card">
+      <div class="crow" onclick="exportData()"><div class="ctitle">Export my data</div><div class="cright">↓</div></div>
+      <div class="crow" onclick="signOut()"><div class="ctitle" style="color:var(--red)">Sign out</div><div class="cright">→</div></div>
+    </div>
+  </div>
+  <div style="height:20px"></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <button class="nb on" data-s="home" onclick="goTo('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span>
+  </button>
+  <button class="nb" data-s="basket" onclick="goTo('basket')" style="position:relative">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 001.99-1.79l1.22-8.2H6"/></svg><span>Basket</span>
+    <div class="nbadge" id="nbadge"></div>
+  </button>
+  <button class="nb" data-s="shop" onclick="goTo('shop')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>Shop</span>
+  </button>
+  <button class="nb" data-s="history" onclick="goTo('history')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg><span>History</span>
+  </button>
+  <button class="nb" data-s="profile" onclick="goTo('profile')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Account</span>
+  </button>
+</nav>
+
+<!-- TOAST -->
+<div id="toast"><div id="tico"></div><div><div id="ttit"></div><div id="tsub" style="font-size:12px;color:var(--t3);margin-top:1px"></div></div></div>
+
+<!-- SHEETS -->
+<div class="sbd" id="sdet" onclick="if(event.target===this)closeS('sdet')"><div class="sp"></div></div>
+<div class="sbd" id="sco" onclick="if(event.target===this)closeS('sco')">
+  <div class="sp">
+    <div class="sh"></div><div class="stitle">Confirm purchase</div>
+    <div style="padding:0 20px" id="coitems"></div>
+    <div style="height:1px;background:var(--line);margin:12px 20px"></div>
+    <div style="display:flex;justify-content:space-between;padding:0 20px;font-size:16px;font-weight:700;margin-bottom:14px">
+      <span>Total</span><span class="mono" style="color:var(--accent)" id="cototal"></span></div>
+    <div style="padding:0 20px;font-size:12px;color:var(--t3);margin-bottom:16px" id="costore"></div>
+    <div style="padding:0 20px 32px;display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-p" onclick="confirmCO()">Pay · <span id="copay"></span></button>
+      <button class="btn-g" onclick="closeS('sco')">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="sbd" id="srec" onclick="if(event.target===this)closeS('srec')"><div class="sp"></div></div>
+<div class="sbd" id="smap" onclick="if(event.target===this)closeS('smap')"><div class="sp"></div></div>
+<div class="sbd" id="sreg" onclick="if(event.target===this)closeS('sreg')"><div class="sp"></div></div>
+
+
+<!-- ═══ EXTENSIONS ═══ -->
+<style>
+.ac-drop{position:absolute;top:100%;left:0;right:0;z-index:50;background:var(--bg1);border:1px solid var(--line);border-radius:12px;margin-top:4px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.ac-item{padding:11px 16px;font-size:14px;color:var(--t1);cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line2)}
+.ac-item:last-child{border-bottom:none}.ac-item:active{background:var(--bg2)}
+.ac-ico{font-size:18px;width:28px;text-align:center}
+.low-card{border-left:3px solid var(--amber)}
+.low-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line2)}
+.low-row:last-child{border-bottom:none}
+.low-ico{width:40px;height:40px;border-radius:10px;background:rgba(224,184,74,.1);border:1px solid rgba(224,184,74,.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.ak-hdr{background:linear-gradient(135deg,rgba(224,184,74,.1),rgba(224,184,74,.03));border-bottom:1px solid rgba(224,184,74,.15);padding:14px 20px}
+.ak-lbl{font-size:10px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase;font-family:var(--mono);font-weight:700;margin-bottom:2px}
+.ak-ttl{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.sbadge{background:rgba(74,200,204,.1);border:1px solid rgba(74,200,204,.2);color:#4ac8cc;border-radius:4px;font-size:9px;font-weight:700;padding:2px 6px;letter-spacing:.04em;cursor:pointer}
+.ed-card{margin:0 16px 10px;border-radius:14px;background:linear-gradient(135deg,var(--bg1),var(--bg2));border:1px solid var(--line);padding:18px}
+.ed-tag{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-family:var(--mono);font-weight:700;margin-bottom:8px}
+.ed-hl{font-size:17px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.ed-body{font-size:13px;color:var(--t2);line-height:1.7}
+.meal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px 16px}
+.mday{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;min-height:72px;transition:all .12s}
+.mday.hm{background:var(--accent2);border-color:rgba(var(--accentRGB),.25)}
+.mday-n{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.mday-e{font-size:20px;margin-bottom:2px}
+.mday-t{font-size:9px;color:var(--t2);line-height:1.2}
+.slot-btn{padding:10px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--t1);font-size:13px;cursor:pointer;font-family:inherit;transition:all .12s;text-align:center}
+.slot-btn.sel{background:var(--accent2);border-color:rgba(var(--accentRGB),.3);color:var(--accent)}
+.pay-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line2);cursor:pointer}
+.pay-row:last-child{border-bottom:none}.pay-row:active{background:var(--bg2)}
+.pay-ico{width:44px;height:30px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:var(--mono);color:var(--t2);flex-shrink:0}
+.mav{width:40px;height:40px;border-radius:11px;background:var(--bg2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:20px}
+.rng{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.rng:last-child{border-bottom:none}
+.instore-bar{display:none;margin:0 16px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(var(--accentRGB),.14),rgba(var(--accentRGB),.04));border:1px solid rgba(var(--accentRGB),.25);padding:11px 16px;align-items:center;gap:10px;cursor:pointer}
+.instore-bar.show{display:flex}
+.ist-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;animation:pulse 1.5s infinite}
+</style>
+
+<script>
+/* ── SEASONAL ── */
+const SEASONAL={0:['p7','b3'],1:['d2','g1'],2:['p5','dr3'],3:['p1','p6'],4:['p4','p3'],5:['p2','dr1'],6:['p2','p3','p4'],7:['p1','p3'],8:['g1','m3'],9:['m1','b1'],10:['d3','m3'],11:['r1','r2']};
+function getSeasonalIds(){return SEASONAL[new Date().getMonth()]||[]}
+
+/* ── SUBS ── */
+const SUBS={m4:'m1',m1:'m2',b2:'b1',d3:'d2',dr2:'dr3'};
+function getSub(id){const s=SUBS[id];return s?getP(s):null}
+
+/* ── PRICE TRACKING ── */
+function getPriceHistory(id){const r=[];hist.forEach(h=>(h.items||[]).forEach(i=>{if(i.id===id)r.push({ts:h.ts,price:i.price})}));return r.sort((a,b)=>a.ts-b.ts)}
+function getPriceChange(id){const r=getPriceHistory(id);if(r.length<2)return null;const l=r[r.length-1].price,p=r[r.length-2].price;return{last:l,prev:p,up:l>p,same:l===p}}
+
+/* ── RUNNING LOW ── */
+function getRunningLow(){
+  const freq={};
+  hist.forEach(h=>(h.items||[]).forEach(i=>{if(!freq[i.id])freq[i.id]=[];freq[i.id].push(h.ts)}));
+  const low=[];
+  Object.entries(freq).forEach(([id,ts])=>{
+    if(ts.length<2)return;
+    const s=[...ts].sort((a,b)=>a-b);
+    const intervals=[];for(let i=1;i<s.length;i++)intervals.push(s[i]-s[i-1]);
+    const avg=intervals.reduce((a,b)=>a+b,0)/intervals.length;
+    const daysSince=(Date.now()-s[s.length-1])/86400000;
+    const avgDays=avg/86400000;
+    if(daysSince>=avgDays*0.7){const p=getP(id);if(p&&!p.oos)low.push({...p,daysSince:Math.round(daysSince),avgDays:Math.round(avgDays)})}
+  });
+  return low.slice(0,4);
+}
+function renderRunningLow(){
+  const items=getRunningLow();
+  const sec=document.getElementById('hlow');const list=document.getElementById('hlow-list');
+  if(!items.length||!list){if(sec)sec.style.display='none';return}
+  sec.style.display='';
+  list.innerHTML=items.map(p=>`<div class="low-row">
+    <div class="low-ico">${p.emoji}</div>
+    <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">${p.name}</div>
+    <div style="font-size:11px;color:var(--amber);margin-top:1px">Last bought ${p.daysSince}d ago · usually every ${p.avgDays}d</div></div>
+    <button onclick="qadd('${p.id}')" style="background:var(--accent);color:#09090b;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+ Add</button>
+  </div>`).join('');
+}
+
+/* ── AUTOCOMPLETE ── */
+function setupAC(){
+  const inp=document.getElementById('ssearch');if(!inp)return;
+  inp.parentElement.style.position='relative';
+  inp.removeEventListener('input',window._acH);
+  window._acH=function(){
+    const q=inp.value.toLowerCase().trim();filterSearch();document.getElementById('ac-drop')?.remove();
+    if(!q||q.length<2)return;
+    const m=getAll().filter(p=>p.name.toLowerCase().includes(q)||p.origin.toLowerCase().includes(q)).slice(0,5);
+    if(!m.length)return;
+    const d=document.createElement('div');d.className='ac-drop';d.id='ac-drop';
+    d.innerHTML=m.map(p=>`<div class="ac-item" onclick="document.getElementById('ssearch').value='${p.name}';sq='${p.name.toLowerCase()}';renderGrid();document.getElementById('ac-drop')?.remove()">
+      <div class="ac-ico">${p.emoji}</div><div style="flex:1"><div>${p.name}</div><div style="font-size:10px;color:var(--t3);font-family:var(--mono)">${p.origin}</div></div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--accent)">${fmt(p.price)}</div></div>`).join('');
+    inp.parentElement.appendChild(d);
+  };
+  inp.addEventListener('input',window._acH);
+  document.addEventListener('click',e=>{if(!e.target.closest('#ac-drop')&&!e.target.closest('.srow'))document.getElementById('ac-drop')?.remove()});
+}
+
+/* ── RECIPE ── */
+let _rm=[];
+function openRecipe(){
+  document.getElementById('srcp').querySelector('.sp').innerHTML=`<div class="sh"></div>
+    <div class="stitle">Recipe to basket</div>
+    <div style="padding:0 20px 14px;font-size:13px;color:var(--t3)">List your ingredients — we'll match what's in store and skip what you likely have.</div>
+    <div style="padding:0 20px;margin-bottom:14px"><textarea id="rcp-inp" placeholder="e.g. chicken breast, olive oil, garlic, tomatoes, spinach, lemon…"
+      style="width:100%;height:110px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--t0);font-size:14px;font-family:inherit;resize:none;outline:none;line-height:1.6"></textarea></div>
+    <div style="padding:0 20px 14px;display:flex;gap:8px">
+      <button class="btn btn-p" onclick="parseRcp()">Match ingredients</button>
+      <button class="btn btn-s" onclick="closeS('srcp')">Cancel</button>
+    </div>
+    <div id="rcp-res" style="display:none;padding:0 20px 32px">
+      <div class="slabel" style="margin-bottom:10px">Matched</div>
+      <div class="card" id="rcp-list"></div>
+      <button class="btn btn-p" style="margin-top:12px" onclick="addRcpToBasket()">Add all to basket</button>
+    </div>`;
+  openS('srcp');
+}
+function parseRcp(){
+  const inp=document.getElementById('rcp-inp');if(!inp?.value.trim())return;
+  const words=inp.value.toLowerCase().split(/[\n,;]+/).map(s=>s.trim()).filter(Boolean);
+  const all=getAll();_rm=[];
+  words.forEach(word=>{
+    const match=all.find(p=>p.name.toLowerCase().includes(word)||word.split(' ').some(w=>p.name.toLowerCase().includes(w)&&w.length>3));
+    if(match&&!_rm.find(m=>m.id===match.id)){
+      const recentBought=hist.some(h=>h.ts>Date.now()-7*86400000&&h.items?.some(i=>i.id===match.id));
+      _rm.push({...match,ingredient:word,lh:recentBought});
+    }else if(!match)_rm.push({id:null,ingredient:word,name:word,lh:false,nf:true});
+  });
+  const res=document.getElementById('rcp-res');const list=document.getElementById('rcp-list');
+  if(!res||!list)return;res.style.display='';
+  list.innerHTML=_rm.map((m,i)=>`<div class="rng">
+    <div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">${m.emoji||'?'}</span>
+    <div><div style="font-size:14px;color:var(--t1)">${m.nf?m.ingredient:m.name}</div>
+    ${m.nf?'<div style="font-size:11px;color:var(--t3)">Not found in store</div>':m.lh?'<div style="font-size:11px;color:var(--g)">✓ Likely at home</div>':`<div style="font-size:11px;color:var(--t3);font-family:var(--mono)">${fmt(m.price)}</div>`}</div></div>
+    ${!m.nf&&!m.lh?`<span onclick="qadd('${m.id}');this.textContent='✓';this.style.color='var(--g)'" style="color:var(--accent);font-size:12px;font-weight:600;cursor:pointer">+ Add</span>`:''}
+  </div>`).join('');
+}
+function addRcpToBasket(){
+  const add=_rm.filter(m=>m.id&&!m.lh&&!m.nf&&!m.oos);
+  add.forEach(p=>qadd(p.id));closeS('srcp');
+  toast('🧑‍🍳',`${add.length} ingredients added`,'Basket updated');goTo('basket');
+}
+
+/* ── MEAL PLAN ── */
+const MEAL_KEY='altura_meals_v2';let meals={};
+function loadMeals(){try{meals=JSON.parse(localStorage.getItem(MEAL_KEY)||'{}')}catch{}}
+function saveMeals(){localStorage.setItem(MEAL_KEY,JSON.stringify(meals))}
+function openMealPlan(){loadMeals();renderMealSheet(document.getElementById('smeal').querySelector('.sp'));openS('smeal')}
+function renderMealSheet(sp){
+  const days=Array.from({length:7},(_,i)=>{
+    const d=new Date();d.setDate(d.getDate()+i);
+    const key=d.toISOString().slice(0,10);
+    return{key,lbl:i===0?'Today':i===1?'Tmrw':['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()],meal:meals[key]};
+  });
+  sp.innerHTML=`<div class="sh"></div><div class="stitle">Meal planner</div>
+    <div style="padding:0 20px 14px;font-size:13px;color:var(--t3)">Plan your week. Tap a day to assign a meal.</div>
+    <div class="meal-grid">${days.map(day=>`
+      <div class="mday${day.meal?' hm':''}" onclick="openMealDay('${day.key}')">
+        <div class="mday-n">${day.lbl}</div>
+        <div class="mday-e">${day.meal?.emoji||'+'}</div>
+        <div class="mday-t">${day.meal?.name?.split(' ').slice(0,2).join(' ')||''}</div>
+      </div>`).join('')}</div>
+    <div style="padding:0 20px 16px">
+      <button class="btn btn-p" onclick="mealToBasket()" style="margin-bottom:10px">Shop for planned meals</button>
+      <button class="btn btn-s" onclick="closeS('smeal')">Done</button>
+    </div>`;
+}
+function openMealDay(key){
+  const sp=document.getElementById('smealday').querySelector('.sp');
+  const d=new Date(key);
+  sp.innerHTML=`<div class="sh"></div><div class="stitle">${d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}</div>
+    <div style="padding:0 16px 12px;font-size:13px;color:var(--t3)">Choose from today's kitchen:</div>
+    ${getAll().filter(p=>p.cat==='prepared').map(p=>`
+      <div class="crow" onclick="setMeal('${key}','${p.id}')">
+        <div class="cicon">${p.emoji}</div><div class="cinfo"><div class="ctitle">${p.name}</div><div class="csub">${p.kcal} kcal · ${p.origin}</div></div>
+        <div class="cright mono">${fmt(p.price)}</div></div>`).join('')}
+    <div class="crow" onclick="clearMeal('${key}')"><div class="cicon" style="color:var(--red)">✕</div><div class="cinfo"><div class="ctitle" style="color:var(--t2)">Clear this day</div></div></div>
+    <div style="height:24px"></div>`;
+  openS('smealday');
+}
+function setMeal(k,id){const p=getP(id);if(!p)return;meals[k]=p;saveMeals();closeS('smealday');renderMealSheet(document.getElementById('smeal').querySelector('.sp'));toast(p.emoji,'Meal planned',p.name)}
+function clearMeal(k){delete meals[k];saveMeals();closeS('smealday');renderMealSheet(document.getElementById('smeal').querySelector('.sp'))}
+function mealToBasket(){const add=Object.values(meals).filter(Boolean);if(!add.length){toast('ℹ','No meals planned','');return}add.forEach(p=>{const ex=basket.find(i=>i.id===p.id);if(ex)ex.qty=(ex.qty||1)+1;else basket.push({...p,qty:1})});saveM();renderBasket();renderHome();closeS('smeal');toast('✓',`${add.length} meals added`,'');goTo('basket')}
+
+/* ── BUTCHER BOOKING ── */
+let _slot=null;
+function openButcher(){
+  const w=store.butcher;const slots=[];const now=new Date();
+  for(let i=0;i<8;i++){const t=new Date(now.getTime()+(w+i*15)*60000);slots.push(t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}))}
+  document.getElementById('sbutcher').querySelector('.sp').innerHTML=`<div class="sh"></div>
+    <div class="stitle">Butcher counter</div>
+    <div style="padding:0 20px 16px">
+      <div style="font-size:13px;color:var(--t3);margin-bottom:16px">Current wait: <span style="color:${w>5?'var(--amber)':'var(--g)'};font-weight:600">${w>0?w+' min':'No wait'}</span> · ${store.name}</div>
+      <div class="slabel" style="margin-bottom:10px">Choose a slot</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">${slots.map(s=>`<button class="slot-btn" onclick="_slot='${s}';document.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${s}</button>`).join('')}</div>
+      <div class="slabel" style="margin-bottom:8px">Your request (optional)</div>
+      <textarea id="butcher-note" placeholder="e.g. 500g diced chicken, 2× ribeye steaks…" style="width:100%;height:80px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--t0);font-size:14px;font-family:inherit;resize:none;outline:none;margin-bottom:16px"></textarea>
+      <button class="btn btn-p" onclick="confirmButcher()" style="margin-bottom:10px">Reserve slot</button>
+      <button class="btn btn-s" onclick="closeS('sbutcher')">Cancel</button>
+    </div>`;
+  openS('sbutcher');
+}
+function confirmButcher(){if(!_slot){toast('ℹ','Choose a slot','');return}const n=document.getElementById('butcher-note')?.value;closeS('sbutcher');toast('🥩',`Booked · ${_slot}`,n?n.slice(0,40):'Slot reserved');_slot=null}
+
+/* ── KITCHEN PRE-ORDER ── */
+function openKitchen(){
+  const sp=document.getElementById('skitchen').querySelector('.sp');
+  sp.innerHTML=`<div class="sh"></div>
+    ${region.hasAkebono?'<div class="ak-hdr"><div class="ak-lbl">Akebono Kitchen</div><div class="ak-ttl">Pre-order · ready on arrival</div></div>':'<div class="stitle">Kitchen pre-order</div>'}
+    <div style="padding:14px 20px;font-size:13px;color:var(--t3)">Order now · ready in 20–25 minutes.</div>
+    ${getAll().filter(p=>p.cat==='prepared').map(p=>{const ak=p.origin?.toLowerCase().includes('akebono');return`<div class="crow"${ak?' style="background:rgba(224,184,74,.03)"':''}>
+      <div class="cicon">${p.emoji}</div>
+      <div class="cinfo"><div class="ctitle">${p.name}${ak?` <span style="font-size:10px;color:var(--amber);font-family:var(--mono)">AK</span>`:''}</div>
+      <div class="csub">${p.kcal} kcal · ${p.origin}</div></div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="mono" style="font-size:13px">${fmt(p.price)}</span>
+      <button onclick="qadd('${p.id}');closeS('skitchen');toast('${p.emoji}','Pre-ordered','Ready in ~20 min')" style="background:var(--accent);color:#09090b;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Order</button></div>
+    </div>`}).join('')}
+    <div style="height:24px"></div>`;
+  openS('skitchen');
+}
+
+/* ── HOUSEHOLD ── */
+const HH_KEY='altura_hh';let hh=[];
+function loadHH(){try{hh=JSON.parse(localStorage.getItem(HH_KEY)||'[]')}catch{}}
+function saveHH(){localStorage.setItem(HH_KEY,JSON.stringify(hh))}
+function openHH(){loadHH();renderHHSheet(document.getElementById('shh').querySelector('.sp'));openS('shh')}
+function renderHHSheet(sp){
+  sp.innerHTML=`<div class="sh"></div><div class="stitle">Household</div>
+    <div style="padding:0 20px 14px;font-size:13px;color:var(--t3)">Share basket and history with household members.</div>
+    <div class="card" style="margin:0 16px 16px">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line2)">
+        <div class="mav">${user?.avatar||'👤'}</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600">${user?.name||'—'}</div><div style="font-size:12px;color:var(--accent)">You · Account holder</div></div>
+      </div>
+      ${hh.map((m,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line2)">
+        <div class="mav">${m.avatar||'👤'}</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600">${m.name}</div><div style="font-size:12px;color:var(--t3);font-family:var(--mono)">${m.email}</div></div>
+        <button onclick="hh.splice(${i},1);saveHH();renderHHSheet(document.getElementById('shh').querySelector('.sp'))" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px;padding:4px">✕</button>
+      </div>`).join('')}
+    </div>
+    <div style="padding:0 20px 14px">
+      <div class="slabel" style="margin-bottom:10px">Add a member</div>
+      <input class="inp" id="hhn" type="text" placeholder="Name" style="margin-bottom:8px"/>
+      <input class="inp" id="hhe" type="email" placeholder="Altura ID email" style="margin-bottom:8px"/>
+      <input class="inp" id="hha" type="text" placeholder="Avatar emoji" maxlength="4" style="margin-bottom:14px"/>
+      <button class="btn btn-p" onclick="addHH()" style="margin-bottom:10px">Add to household</button>
+      <button class="btn btn-s" onclick="closeS('shh')">Done</button>
+    </div>`;
+}
+function addHH(){
+  const n=document.getElementById('hhn')?.value.trim(),e=document.getElementById('hhe')?.value.trim(),a=document.getElementById('hha')?.value.trim()||'👤';
+  if(!n||!e?.includes('@')){toast('ℹ','Enter name and email','');return}
+  hh.push({name:n,email:e,avatar:a});saveHH();renderHHSheet(document.getElementById('shh').querySelector('.sp'));toast('👥',n+' added','');
+}
+
+/* ── PAYMENT METHODS ── */
+const PAY_KEY='altura_pay';let pays=[{id:'aid',type:'Altura Pay',last4:null,def:true}];
+function loadPay(){try{const d=JSON.parse(localStorage.getItem(PAY_KEY));if(d?.length)pays=d}catch{}}
+function savePay(){localStorage.setItem(PAY_KEY,JSON.stringify(pays))}
+function openPay(){loadPay();renderPaySheet(document.getElementById('spay').querySelector('.sp'));openS('spay')}
+function renderPaySheet(sp){
+  sp.innerHTML=`<div class="sh"></div><div class="stitle">Payment methods</div>
+    <div class="card" style="margin:0 16px 16px">
+      ${pays.map((m,i)=>`<div class="pay-row" onclick="pays.forEach((x,j)=>x.def=j===${i});savePay();renderPaySheet(document.getElementById('spay').querySelector('.sp'));toast('✓','Default updated',pays[${i}].type)">
+        <div class="pay-ico">${m.type==='Altura Pay'?'A↑':'💳'}</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600">${m.type}${m.last4?` ···· ${m.last4}`:''}</div>
+        <div style="font-size:12px;color:var(--t3)">${m.def?'✓ Default':'Tap to set default'}</div></div>
+        ${m.id!=='aid'?`<button onclick="event.stopPropagation();pays.splice(${i},1);savePay();renderPaySheet(document.getElementById('spay').querySelector('.sp'))" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px">✕</button>`:''}
+      </div>`).join('')}
+    </div>
+    <div style="padding:0 20px 14px">
+      <div class="slabel" style="margin-bottom:10px">Add a card</div>
+      <input class="inp" id="cn" type="text" placeholder="Last 4 digits" maxlength="4" inputmode="numeric" style="margin-bottom:8px"/>
+      <select class="inp" id="ct" style="margin-bottom:14px;appearance:auto"><option>Visa</option><option>Mastercard</option><option>Amex</option></select>
+      <button class="btn btn-p" onclick="addCard()" style="margin-bottom:10px">Add card</button>
+      <button class="btn btn-s" onclick="closeS('spay')">Done</button>
+    </div>`;
+}
+function addCard(){
+  const l=document.getElementById('cn')?.value.trim(),t=document.getElementById('ct')?.value;
+  if(!l||l.length!==4||!/^\d+$/.test(l)){toast('ℹ','Enter 4-digit number','');return}
+  pays.push({id:Date.now().toString(),type:t,last4:l,def:false});savePay();renderPaySheet(document.getElementById('spay').querySelector('.sp'));toast('💳','Card added',`${t} ···· ${l}`);
+}
+
+/* ── AKEBONO SECTION ── */
+function renderAkebono(){
+  if(!region.hasAkebono)return;
+  const el=document.getElementById('hak');if(!el)return;
+  const seasonal=getSeasonalIds().map(id=>getP(id)).filter(Boolean);
+  const preps=getAll().filter(p=>p.cat==='prepared');
+  el.innerHTML=`<div class="ak-hdr"><div class="ak-lbl">Akebono Kitchen${region.akebonoPrimary?' · Primary format':''}</div>
+    <div class="ak-ttl">今日のメニュー · Today's menu</div></div>
+    ${preps.slice(0,3).map(p=>{const ak=p.origin?.toLowerCase().includes('akebono');return`<div class="crow"${ak?' style="background:rgba(224,184,74,.03)"':''}>
+      <div class="cicon">${p.emoji}</div>
+      <div class="cinfo"><div class="ctitle">${p.name}</div><div class="csub">${p.kcal} kcal · ${p.allergens?.join(', ')||'No allergens'}</div></div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="mono" style="font-size:13px">${fmt(p.price)}</span>
+      <button onclick="qadd('${p.id}');toast('${p.emoji}','Pre-ordered','Ready in ~20 min')" style="background:var(--amber);color:#09090b;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Pre-order</button></div>
+    </div>`}).join('')}
+    ${seasonal.length?`<div style="padding:12px 16px;border-top:1px solid var(--line2)">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--amber);text-transform:uppercase;font-family:var(--mono);margin-bottom:8px">旬 · In season</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">${seasonal.map(p=>`<span class="sbadge" onclick="openD('${p.id}')">${p.emoji} ${p.name}</span>`).join('')}</div>
+    </div>`:''}`;}
+
+/* ── EDITORIAL ── */
+const EDS={slc:{tag:'From the Basin',hl:'Great Basin Honey — the slow harvest',body:'Our Nevada supplier runs 200 hives across the high desert between Ely and Eureka, producing one of the lightest honeys we carry. Notes of sage and wildflower.'},
+  phx:{tag:'Sonoran Season',hl:'What grows in the desert',body:'April in the Sonoran means citrus from the valley floor and the first tomatoes are ready. Our Arizona Basin growers are running a short season — get them while they last.'},
+  den:{tag:'Colorado Highlands',hl:'Bison from the high plains',body:'Ground bison from our Montana partner is leaner than beef, higher in iron, and raised on open range. Holds well frozen and cooks fast.'},
+  sfc:{tag:'Now at Waterfront',hl:'The Akebono Kitchen opens on the bay',body:'The Waterfront kitchen opened this week. Both menus rotate — the miso ramen is on until Friday. Japantown follows the seasonal shun calendar.'},
+  chi:{tag:'The Mandate',hl:'Chicago — a city that chose itself',body:'The Mandate of Chicago declared independence quietly, through infrastructure rather than conflict. Altura arrived six months later. The Loop store opened on a Wednesday. By Friday the queue was an hour long.'},
+  gb:{tag:'The Commonwealth',hl:'British produce, properly sourced',body:'Our Scottish beef comes from a single estate in Perthshire. The Cornish salt is harvested by hand. Great Britain has always known how to produce food. We are simply making it easier to find.'},
+  tyo:{tag:'旬 · Shun',hl:'Peak season in Tokyo',body:'This month: new-harvest rice from Niigata, first-run bonito from the Pacific, and young bamboo shoots from Kyoto. Shun guides everything at Akebono Market.'}};
+function renderEditorial(){const ed=EDS[region.id]||EDS.slc;const el=document.getElementById('hed');if(!el)return;
+  el.innerHTML=`<div class="ed-card"><div class="ed-tag">${ed.tag}</div><div class="ed-hl">${ed.hl}</div><div class="ed-body">${ed.body}</div></div>`;}
+
+/* ── IN-STORE MODE ── */
+function checkInStore(){/* geolocation removed — in-store triggered via QR scan only */}
+
+/* ── PATCH HOME RENDER ── */
+
+/* ── PATCH SHOP ── */
+
+/* ── PATCH PROFILE (moved below renderProfile definition) ── */
+;
+/* ── ALIAS FIXES ── */
+window.openPay=openPay;window.openHH=openHH;
+
+window.addEventListener('load',function(){checkInStore();loadMeals();loadHH();loadPay()});
+</script>
+
+<!-- New home sections -->
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  const home=document.getElementById('sc-home');if(!home)return;
+  const extras=document.createElement('div');
+  extras.innerHTML=`
+    <div id="hlow" style="display:none;padding:0 16px;margin-bottom:18px">
+      <div class="slabel">Running low</div><div class="card low-card" id="hlow-list"></div>
+    </div>
+    <div class="sec" id="hak-sec">
+      <div class="slabel">Akebono Kitchen</div><div class="card" id="hak"></div>
+    </div>
+    <div id="hed" style="margin-bottom:18px"></div>
+    <div class="sec">
+      <div class="slabel">Quick actions</div>
+      <div class="card">
+        <div class="crow" onclick="openRecipe()"><div class="cicon">🧑‍🍳</div><div class="cinfo"><div class="ctitle">Recipe to basket</div><div class="csub">Paste a recipe, we'll match ingredients</div></div><div class="cright">→</div></div>
+        <div class="crow" onclick="openMealPlan()"><div class="cicon">📅</div><div class="cinfo"><div class="ctitle">Meal planner</div><div class="csub">Plan your week, shop in one go</div></div><div class="cright">→</div></div>
+        <div class="crow" onclick="openButcher()"><div class="cicon">🥩</div><div class="cinfo"><div class="ctitle">Butcher counter</div><div class="csub" id="qa-bsub">Reserve a slot</div></div><div class="cright">→</div></div>
+        <div class="crow" onclick="openKitchen()"><div class="cicon">🍱</div><div class="cinfo"><div class="ctitle">Pre-order from kitchen</div><div class="csub">Ready when you arrive</div></div><div class="cright">→</div></div>
+      </div>
+    </div>`;
+  home.appendChild(extras);
+  // In-store banner
+  const bar=document.createElement('div');bar.className='instore-bar';bar.id='instore-bar';
+  bar.onclick=()=>showMap();
+  bar.innerHTML='<div class="ist-dot"></div><span style="font-size:13px;color:var(--accent);font-weight:600">In-store mode active</span><span style="font-size:12px;color:var(--t2);margin-left:4px">· Tap for floor map</span>';
+  const stcard=home.querySelector('.stcard');if(stcard)home.insertBefore(bar,stcard);
+  // Update butcher sub
+  if(store){const s=document.getElementById('qa-bsub');if(s)s.textContent=store.butcher>0?`${store.butcher} min wait · book to skip`:'No wait · counter open'}
+});
+</script>
+
+<!-- New sheets -->
+<div class="sbd" id="srcp" onclick="if(event.target===this)closeS('srcp')"><div class="sp"></div></div>
+<div class="sbd" id="smeal" onclick="if(event.target===this)closeS('smeal')"><div class="sp"></div></div>
+<div class="sbd" id="smealday" onclick="if(event.target===this)closeS('smealday')"><div class="sp"></div></div>
+<div class="sbd" id="sbutcher" onclick="if(event.target===this)closeS('sbutcher')"><div class="sp"></div></div>
+<div class="sbd" id="skitchen" onclick="if(event.target===this)closeS('skitchen')"><div class="sp"></div></div>
+<div class="sbd" id="shh" onclick="if(event.target===this)closeS('shh')"><div class="sp"></div></div>
+<div class="sbd" id="spay" onclick="if(event.target===this)closeS('spay')"><div class="sp"></div></div>
+
+<div id="qrov">
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--t3);text-transform:uppercase">Walk-in code</div>
+  <div class="qrcard"><canvas id="qrc" width="200" height="200"></canvas><div style="font-family:var(--mono);font-size:11px;color:#18181b;letter-spacing:.08em" id="qru"></div></div>
+  <div style="font-size:13px;color:var(--t2);text-align:center;line-height:1.7;max-width:240px" id="qrsi"></div>
+  <div style="font-size:12px;color:var(--t3);text-align:center;line-height:1.7;max-width:240px">Hold to the reader at the entrance.<br>Your basket updates as you shop.</div>
+  <button class="btn btn-s" style="width:200px" onclick="closeQR()">Close</button>
+</div>
+
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// REGION CONFIG — add/edit regions here before publishing
+// ═══════════════════════════════════════════════════════════
+const REGIONS = {
+  slc:{id:'slc',name:'Salt Lake City',country:'Halonesia',cur:'$',code:'HAL',
+    accent:'#9ddb5e',rgb:'157,219,94',hasAkebono:true,tagline:'The original.',
+    stores:[
+      {id:'slc-main',name:'Main Street',addr:'247 Main Street, SLC',open:'07:00',close:'22:00',dist:'0.3 mi',butcher:2,kitchen:'busy',lat:40.7608,lon:-111.8910},
+      {id:'slc-sugar',name:'Sugar House',addr:'1100 E 2100 S, SLC',open:'08:00',close:'21:00',dist:'1.2 mi',butcher:0,kitchen:'quiet',lat:40.7235,lon:-111.8583},
+    ],
+    offers:[{id:'p4',sale:2.99,exp:'Sun 27 Apr'},{id:'d3',sale:3.99,exp:'Mon 28 Apr'}],
+    newArrivals:['dr2','dr3'],
+    overrides:{}},
+
+  phx:{id:'phx',name:'Phoenix',country:'Halonesia',cur:'$',code:'HAL',
+    accent:'#e07b20',rgb:'224,123,32',hasAkebono:true,tagline:'The capital.',
+    stores:[
+      {id:'phx-dt',name:'Downtown Phoenix',addr:'1 E Washington St',open:'07:00',close:'22:00',dist:'0.1 mi',butcher:8,kitchen:'busy',lat:33.4484,lon:-112.0740},
+      {id:'phx-sc',name:'Scottsdale',addr:'7014 E Camelback Rd',open:'08:00',close:'22:00',dist:'4.2 mi',butcher:3,kitchen:'normal',lat:33.5092,lon:-111.9261},
+    ],
+    offers:[{id:'m1',sale:14.99,exp:'Sat 26 Apr'}],
+    newArrivals:['p3','p6'],
+    overrides:{g1:{name:'Sonoran Desert Honey',origin:'Sonoran Desert'}}},
+
+  den:{id:'den',name:'Denver',country:'Halonesia',cur:'$',code:'HAL',
+    accent:'#4a8ccc',rgb:'74,140,204',hasAkebono:false,tagline:'The cultural hub.',
+    stores:[
+      {id:'den-lodo',name:'LoDo',addr:'1600 15th St, Denver',open:'07:00',close:'22:00',dist:'0.6 mi',butcher:4,kitchen:'normal',lat:39.7508,lon:-104.9997},
+      {id:'den-cc',name:'Cherry Creek',addr:'2800 E 2nd Ave',open:'08:00',close:'21:00',dist:'2.1 mi',butcher:0,kitchen:'quiet',lat:39.7167,lon:-104.9536},
+    ],
+    offers:[{id:'b1',sale:3.29,exp:'Fri 25 Apr'},{id:'g3',sale:6.99,exp:'Sun 27 Apr'}],
+    newArrivals:['g4','b3'],
+    overrides:{m3:{name:'Colorado Bison',origin:'Colorado Highlands'}}},
+
+  sfc:{id:'sfc',name:'San Francisco',country:'Halonesia (Compact Zone)',cur:'$',code:'USD',
+    accent:'#4ac8cc',rgb:'74,200,204',hasAkebono:true,tagline:'Now arriving.',
+    stores:[
+      {id:'sfc-wf',name:'Waterfront',addr:'1 Market St, SF',open:'07:00',close:'23:00',dist:'0.0 mi',butcher:12,kitchen:'busy'},
+      {id:'sfc-ms',name:'Mission District',addr:'2401 Mission St',open:'08:00',close:'22:00',dist:'1.8 mi',butcher:3,kitchen:'normal'},
+      {id:'sfc-jt',name:'Akebono · Japantown',addr:'1737 Post St',open:'09:00',close:'21:00',dist:'2.3 mi',butcher:0,kitchen:'quiet',akebono:true},
+    ],
+    offers:[{id:'r1',sale:7.99,exp:'Sun 27 Apr'},{id:'dr2',sale:3.49,exp:'Mon 28 Apr'}],
+    newArrivals:['r2','dr3'],
+    overrides:{g2:{name:'Pacific Sea Salt',origin:'Pacific Coast'}}},
+
+  tyo:{id:'tyo',name:'Tokyo',country:'Japan',cur:'¥',code:'JPY',
+    accent:'#e0b84a',rgb:'224,184,74',hasAkebono:true,akebonoPrimary:true,tagline:'Where it began.',
+    stores:[
+      {id:'tyo-sb',name:'Shibuya',addr:'2-21-1 Dogenzaka, Shibuya',open:'08:00',close:'23:00',dist:'0.4 km',butcher:0,kitchen:'busy'},
+      {id:'tyo-sj',name:'Shinjuku',addr:'3-1-1 Shinjuku',open:'08:00',close:'23:00',dist:'1.2 km',butcher:2,kitchen:'normal'},
+    ],
+    offers:[{id:'r2',sale:8.99,exp:'Sun 27 Apr'}],
+    newArrivals:['r1','r2'],
+    overrides:{r1:{name:'Tonkotsu Ramen',origin:'Akebono Kitchen, Tokyo'},
+               r2:{name:'Kaiseki Bento',origin:'Akebono Kitchen, Tokyo'},
+               g1:{name:'Hokkaido Honey',origin:'Hokkaido, Japan'},
+               g2:{name:'Okinawa Sea Salt',origin:'Okinawa, Japan'}}},
+
+  chi:{id:'chi',name:'Chicago',country:'Mandate of Chicago',cur:'$',code:'MOC',
+    accent:'#9c7ce0',rgb:'156,124,224',hasAkebono:false,tagline:'The mandate.',
+    stores:[
+      {id:'chi-loop',name:'The Loop',addr:'1 N Dearborn St, Chicago',open:'07:00',close:'22:00',dist:'0.2 mi',butcher:5,kitchen:'busy'},
+      {id:'chi-wicker',name:'Wicker Park',addr:'1500 N Damen Ave',open:'08:00',close:'21:00',dist:'2.4 mi',butcher:0,kitchen:'normal'},
+      {id:'chi-lakeview',name:'Lakeview',addr:'3200 N Clark St',open:'08:00',close:'22:00',dist:'3.1 mi',butcher:2,kitchen:'quiet'},
+    ],
+    offers:[{id:'m2',sale:5.99,exp:'Sun 27 Apr'},{id:'b1',sale:3.49,exp:'Mon 28 Apr'}],
+    newArrivals:['g4','dr2'],
+    overrides:{
+      m3:{name:'Midwest Bison',origin:'Illinois Prairie'},
+      d3:{name:'Great Lakes Cheddar',origin:'Wisconsin Border'},
+      g2:{name:'Lake Michigan Sea Salt',origin:'Lake Michigan'},
+    }},
+
+  gb:{id:'gb',name:'London',country:'Commonwealth of Great Britain',cur:'£',code:'GBP',
+    accent:'#cc4a4a',rgb:'204,74,74',hasAkebono:true,tagline:'The commonwealth.',
+    stores:[
+      {id:'gb-city',name:'City of London',addr:'1 Bank Street, EC2V 8EU',open:'07:00',close:'22:00',dist:'0.0 mi',butcher:3,kitchen:'busy'},
+      {id:'gb-shoreditch',name:'Shoreditch',addr:'91 Great Eastern St, E1 6RA',open:'08:00',close:'22:00',dist:'1.2 mi',butcher:0,kitchen:'normal'},
+      {id:'gb-notting',name:'Notting Hill',addr:'44 Pembridge Rd, W11 3HN',open:'08:00',close:'21:00',dist:'4.3 mi',butcher:1,kitchen:'quiet'},
+      {id:'gb-ak',name:'Akebono · Soho',addr:'18 Frith Street, W1D 4RQ',open:'09:00',close:'22:00',dist:'0.8 mi',butcher:0,kitchen:'busy',akebono:true},
+    ],
+    offers:[{id:'p4',sale:2.49,exp:'Sun 27 Apr'},{id:'r1',sale:6.99,exp:'Sat 26 Apr'}],
+    newArrivals:['b3','dr3'],
+    overrides:{
+      m1:{name:'Scottish Highland Beef',origin:'Scottish Highlands'},
+      m2:{name:'Free Range Chicken',origin:'Devon Farms'},
+      g1:{name:'Cotswolds Honey',origin:'Cotswolds, GB'},
+      g2:{name:'Cornish Sea Salt',origin:'Cornwall, GB'},
+      g3:{name:'Olive Oil',origin:'Mediterranean'},
+      d3:{name:'Cornish Cheddar',origin:'Cornwall, GB'},
+      b1:{name:'Sourdough Loaf',origin:'Altura Bakehouse, Bermondsey'},
+      r3:{name:'Grain Bowl',origin:'Altura Kitchen, Shoreditch'},
+    }},
+  // TEMPLATE — copy and edit to add a new region:
+  // newcity:{id:'newcity',name:'City',country:'Country',cur:'$',code:'USD',
+  //   accent:'#9ddb5e',rgb:'157,219,94',hasAkebono:false,tagline:'Coming soon.',
+  //   stores:[{id:'nc-main',name:'Main',addr:'123 Main St',open:'08:00',close:'22:00',dist:'0 mi',butcher:0,kitchen:'quiet'}],
+  //   offers:[],newArrivals:[],overrides:{}},
+};
+
+// ═══════════════════════════════════════════════════════════
+// PRODUCTS — edit names/prices per-product,
+// use region.overrides to customise per-region
+// ═══════════════════════════════════════════════════════════
+const PDB = [
+  {id:'p1',name:'Organic Tomatoes',emoji:'🍅',price:2.49,origin:'Arizona Basin',cat:'produce',kcal:18,pro:0.9,fat:0.2,carb:3.9,fib:1.2,allergens:[]},
+  {id:'p2',name:'Sweet Corn',emoji:'🌽',price:0.89,origin:'Colorado Valley',cat:'produce',kcal:86,pro:3.2,fat:1.2,carb:19,fib:2.1,allergens:[]},
+  {id:'p3',name:'Avocado',emoji:'🥑',price:1.29,origin:'Sonora, Mexico',cat:'produce',kcal:160,pro:2.0,fat:15,carb:9,fib:6.7,allergens:[]},
+  {id:'p4',name:'Blueberries',emoji:'🫐',price:3.99,origin:'Idaho Highlands',cat:'produce',kcal:57,pro:0.7,fat:0.3,carb:14,fib:2.4,allergens:[]},
+  {id:'p5',name:'Baby Spinach',emoji:'🥬',price:2.19,origin:'Utah Greenhouse',cat:'produce',kcal:23,pro:2.9,fat:0.4,carb:3.6,fib:2.2,allergens:[]},
+  {id:'p6',name:'Lemon',emoji:'🍋',price:0.49,origin:'Arizona',cat:'produce',kcal:29,pro:1.1,fat:0.3,carb:9,fib:2.8,allergens:[]},
+  {id:'p7',name:'Carrots',emoji:'🥕',price:1.09,origin:'Utah Valley',cat:'produce',kcal:41,pro:0.9,fat:0.2,carb:10,fib:2.8,allergens:[]},
+  {id:'m1',name:'Wyoming Ribeye',emoji:'🥩',price:18.99,origin:'Wyoming Ranch',cat:'meat',kcal:291,pro:24,fat:21,carb:0,fib:0,allergens:[]},
+  {id:'m2',name:'Free Range Chicken',emoji:'🍗',price:7.49,origin:'Utah Farms',cat:'meat',kcal:165,pro:31,fat:3.6,carb:0,fib:0,allergens:[]},
+  {id:'m3',name:'Ground Bison',emoji:'🦬',price:12.99,origin:'Montana',cat:'meat',kcal:143,pro:20,fat:7,carb:0,fib:0,allergens:[]},
+  {id:'m4',name:'Lamb Chops',emoji:'🍖',price:14.49,origin:'Colorado Highlands',cat:'meat',kcal:258,pro:25,fat:17,carb:0,fib:0,allergens:[],oos:true},
+  {id:'b1',name:'Sourdough Loaf',emoji:'🍞',price:4.49,origin:'Altura Bakehouse',cat:'bakery',kcal:289,pro:8,fat:1.5,carb:58,fib:3.2,allergens:['Gluten']},
+  {id:'b2',name:'Croissant',emoji:'🥐',price:2.29,origin:'Altura Bakehouse',cat:'bakery',kcal:406,pro:8.2,fat:21,carb:46,fib:1.8,allergens:['Gluten','Dairy','Eggs']},
+  {id:'b3',name:'Seeded Rye',emoji:'🫓',price:3.99,origin:'Altura Bakehouse',cat:'bakery',kcal:259,pro:8.5,fat:3.3,carb:48,fib:6.0,allergens:['Gluten']},
+  {id:'d1',name:'Whole Milk',emoji:'🥛',price:1.89,origin:'Utah Dairy',cat:'dairy',kcal:61,pro:3.2,fat:3.3,carb:4.8,fib:0,allergens:['Dairy']},
+  {id:'d2',name:'Greek Yoghurt',emoji:'🍦',price:3.29,origin:'Utah Dairy',cat:'dairy',kcal:97,pro:9,fat:5,carb:3.6,fib:0,allergens:['Dairy']},
+  {id:'d3',name:'Aged Cheddar',emoji:'🧀',price:5.49,origin:'Wisconsin',cat:'dairy',kcal:402,pro:25,fat:33,carb:1.3,fib:0,allergens:['Dairy']},
+  {id:'g1',name:'Great Basin Honey',emoji:'🍯',price:6.99,origin:'Nevada',cat:'pantry',kcal:304,pro:0.3,fat:0,carb:82,fib:0.2,allergens:[]},
+  {id:'g2',name:'Halonesia Sea Salt',emoji:'🧂',price:3.49,origin:'Great Salt Lake',cat:'pantry',kcal:0,pro:0,fat:0,carb:0,fib:0,allergens:[]},
+  {id:'g3',name:'Olive Oil',emoji:'🫒',price:8.99,origin:'New Mexico',cat:'pantry',kcal:884,pro:0,fat:100,carb:0,fib:0,allergens:[]},
+  {id:'g4',name:'Quinoa',emoji:'🌾',price:4.99,origin:'Colorado',cat:'pantry',kcal:368,pro:14,fat:6,carb:64,fib:7,allergens:[]},
+  {id:'r1',name:'Miso Ramen Bowl',emoji:'🍜',price:9.99,origin:'Akebono Kitchen',cat:'prepared',kcal:380,pro:14,fat:12,carb:52,fib:3,allergens:['Gluten','Soy']},
+  {id:'r2',name:'Bento Box',emoji:'🍱',price:11.99,origin:'Akebono Kitchen',cat:'prepared',kcal:520,pro:22,fat:14,carb:68,fib:4,allergens:['Gluten','Soy','Sesame']},
+  {id:'r3',name:'Grain Bowl',emoji:'🥗',price:8.49,origin:'Altura Kitchen',cat:'prepared',kcal:410,pro:18,fat:16,carb:48,fib:8,allergens:[]},
+  {id:'r4',name:'Chicken Wrap',emoji:'🌯',price:7.99,origin:'Altura Kitchen',cat:'prepared',kcal:445,pro:28,fat:14,carb:46,fib:3,allergens:['Gluten','Dairy']},
+  {id:'dr1',name:'Sparkling Water',emoji:'💧',price:1.49,origin:'Utah Springs',cat:'drinks',kcal:0,pro:0,fat:0,carb:0,fib:0,allergens:[]},
+  {id:'dr2',name:'Cold Brew',emoji:'☕',price:4.99,origin:'Altura Roasters',cat:'drinks',kcal:5,pro:0.3,fat:0,carb:0,fib:0,allergens:[]},
+  {id:'dr3',name:'Kombucha',emoji:'🧃',price:3.79,origin:'Utah',cat:'drinks',kcal:30,pro:0,fat:0,carb:7,fib:0,allergens:[]},
+];
+
+const CATS=[
+  {id:'all',lbl:'All'},{id:'produce',lbl:'🥦 Produce'},{id:'meat',lbl:'🥩 Meat'},
+  {id:'bakery',lbl:'🍞 Bakery'},{id:'dairy',lbl:'🥛 Dairy'},{id:'pantry',lbl:'🫙 Pantry'},
+  {id:'prepared',lbl:'🍱 Prepared'},{id:'drinks',lbl:'☕ Drinks'},
+];
+
+const CATCOLS={produce:'#9ddb5e',meat:'#cc4a4a',bakery:'#e0b84a',dairy:'#4a8ccc',
+               pantry:'#4ac8cc',prepared:'#9c7ce0',drinks:'#e07b20'};
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const AK='altura_auth',MK='altura_market_v2',PK='altura_prefs_v2',RK='altura_region',NK='altura_notify';
+let user=null,region=null,store=null;
+let basket=[],hist=[],prefs={nutrition:false,reorder:true,notifs:true,diet:[]};
+let notifySet=new Set(),curCat='all',curScreen='home',dqty=1,sq='';
+
+// ═══════════════════════════════════════════════════════════
+// REGION
+// ═══════════════════════════════════════════════════════════
+function setRegion(r){
+  region=r; store=r.stores[0];
+  const root=document.documentElement;
+  root.style.setProperty('--accent',r.accent);
+  root.style.setProperty('--accent2',`rgba(${r.rgb},.1)`);
+  root.style.setProperty('--accentRGB',r.rgb);
+  localStorage.setItem(RK,r.id);
+}
+
+function getP(id){
+  const b=PDB.find(p=>p.id===id); if(!b) return null;
+  return {...b,...(region?.overrides?.[id]||{})};
+}
+function getAll(){return PDB.map(p=>({...p,...(region?.overrides?.[p.id]||{})}))}
+function fmt(n){return (region?.cur||'$')+Number(n).toFixed(2)}
+function getOffers(){
+  return (region?.offers||[]).map(o=>{const p=getP(o.id);return p?{...p,sale:o.sale,exp:o.exp}:null}).filter(Boolean);
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+function init(){
+  try{prefs={...prefs,...JSON.parse(localStorage.getItem(PK)||'{}')}}catch{}
+  try{notifySet=new Set(JSON.parse(localStorage.getItem(NK)||'[]'))}catch{}
+  try{const d=JSON.parse(localStorage.getItem(MK)||'{}');basket=d.basket||[];hist=d.history||[]}catch{}
+  setRegion(REGIONS[localStorage.getItem(RK)||'slc']||REGIONS.slc);
+  try{user=JSON.parse(localStorage.getItem(AK))}catch{}
+  // Check URL import
+  const urlAid=new URLSearchParams(location.search).get('aid');
+  if(urlAid){try{user=JSON.parse(atob(urlAid));localStorage.setItem(AK,JSON.stringify(user));history.replaceState({},'',location.pathname)}catch{}}
+  if(user){document.getElementById('ss').style.display='none';goTo('home')}
+  else buildSignin();
+}
+
+function buildSignin(){
+  document.getElementById('ss').style.display='flex';
+  const ex=user||(()=>{try{return JSON.parse(localStorage.getItem(AK))}catch{return null}})();
+  if(ex){
+    const n=document.getElementById('sid');n.style.display='';
+    n.textContent=`Altura ID detected — ${ex.name||ex.email}. Tap Continue.`;
+    document.getElementById('sn').value=ex.name||'';
+    document.getElementById('se').value=ex.email||'';
+    document.getElementById('sa').value=ex.avatar||'';
+  }
+  const rp=document.getElementById('sr');
+  rp.innerHTML=Object.values(REGIONS).map(r=>`<option value="${r.id}">${r.name}, ${r.country}</option>`).join('');
+  rp.value=region?.id||'slc';
+}
+
+function signIn(){
+  const name=document.getElementById('sn').value.trim();
+  const email=document.getElementById('se').value.trim();
+  const avatar=document.getElementById('sa').value.trim()||'🔭';
+  const rid=document.getElementById('sr').value;
+  if(!name||!email.includes('@')){toast('⚠','Required','Enter name and email');return}
+  user={name,email,avatar,ts:Date.now()};
+  localStorage.setItem(AK,JSON.stringify(user));
+  setRegion(REGIONS[rid]||REGIONS.slc);
+  document.getElementById('ss').style.display='none';
+  goTo('home');toast('👋',`Welcome, ${name.split(' ')[0]}`,`Signed in · ${region.name}`);
+}
+
+function importFromSearch(){
+  try{
+    const d=JSON.parse(localStorage.getItem(AK));
+    if(d){document.getElementById('sn').value=d.name||'';document.getElementById('se').value=d.email||'';
+      document.getElementById('sa').value=d.avatar||'🔭';
+      const n=document.getElementById('sid');n.style.display='';
+      n.textContent=`✓ Altura ID found: ${d.name||d.email}`;
+      toast('🔗','Imported','Tap Continue to sign in');return}
+  }catch{}
+  toast('ℹ','Not found','Open Altura Search first');
+}
+function signOut(){if(!confirm('Sign out?'))return;user=null;basket=[];saveM();buildSignin()}
+
+// ═══════════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════════
+function goTo(id){
+  ['home','basket','shop','history','profile'].forEach(s=>{
+    document.getElementById('sc-'+s)?.classList.remove('active');
+  });
+  document.getElementById('sc-'+id)?.classList.add('active');
+  document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.s===id));
+  curScreen=id;
+  if(id==='home')renderHome();
+  if(id==='basket')renderBasket();
+  if(id==='shop')renderShop();
+  if(id==='history')renderHistory();
+  if(id==='profile')renderProfile();
+  updBadge();
+}
+function updBadge(){
+  const n=basket.reduce((a,i)=>a+(i.qty||1),0);
+  const b=document.getElementById('nbadge');
+  if(b){b.textContent=n||'';b.style.display=n?'':'none'}
+}
+
+// ═══════════════════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════════════════
+function renderHome(){
+  if(!user||!region)return;
+  document.getElementById('hav').textContent=user.avatar||'👤';
+  const s=store;
+  const open=isOpen(s);
+  document.getElementById('spill').className=`pill ${open?'pg':'pr'}`;
+  document.getElementById('spill').innerHTML=`<div class="pdot"></div> ${open?'Open':'Closed'}`;
+  document.getElementById('sctime').textContent=open?`Closes ${s.close}`:`Opens ${s.open}`;
+  document.getElementById('snm').textContent=`Altura Market · ${s.name}`;
+  document.getElementById('sadr').textContent=`${s.addr} · ${s.dist}`;
+  const sf=document.getElementById('sfoot');
+  sf.innerHTML=`<span>Butcher ${s.butcher>0?`<span style="color:var(--accent)">${s.butcher} min</span>`:'<span style="color:var(--g)">No wait</span>'}</span>
+    <span>Kitchen <span style="color:${s.kitchen==='busy'?'var(--amber)':s.kitchen==='quiet'?'var(--g)':'var(--t2)'}">${s.kitchen}</span></span>
+    <span style="color:var(--t3)">${region.name}</span>`;
+  // Week
+  const now=Date.now(),wk=now-7*86400000;
+  const wh=hist.filter(h=>h.ts>wk);
+  document.getElementById('wsp').textContent=fmt(wh.reduce((a,h)=>a+h.total,0));
+  document.getElementById('wvi').textContent=wh.length;
+  document.getElementById('wit').textContent=wh.reduce((a,h)=>a+(h.items?.reduce((x,i)=>x+(i.qty||1),0)||0),0);
+  // Basket preview
+  const bs=document.getElementById('hbs');
+  if(basket.length){
+    bs.style.display='';
+    document.getElementById('hbp').innerHTML=`<div class="crow" onclick="goTo('basket')">
+      <div class="cicon">🧺</div>
+      <div class="cinfo"><div class="ctitle">${basket.reduce((a,i)=>a+(i.qty||1),0)} item${basket.reduce((a,i)=>a+(i.qty||1),0)!==1?'s':''}</div>
+      <div class="csub">${basket.slice(0,5).map(i=>i.emoji).join(' ')}</div></div>
+      <div class="cright mono" style="color:var(--accent)">${fmt(basketTotal())}</div></div>`;
+  }else bs.style.display='none';
+  // Reorder
+  const bought={};
+  hist.forEach(h=>(h.items||[]).forEach(i=>{bought[i.id]=(bought[i.id]||0)+(i.qty||1)}));
+  const top=Object.entries(bought).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([id])=>getP(id)).filter(Boolean);
+  document.getElementById('hro').innerHTML=top.length
+    ?top.map(p=>`<div class="crow" onclick="qadd('${p.id}')">
+      <div class="cicon">${p.emoji}</div>
+      <div class="cinfo"><div class="ctitle">${p.name}</div><div class="csub mono" style="font-size:10px">${p.origin}</div></div>
+      <div style="font-size:13px;font-weight:700;color:var(--accent);font-family:var(--mono)">+ ${fmt(p.price)}</div></div>`).join('')
+    :'<div style="padding:16px;font-size:13px;color:var(--t3);text-align:center">Shop to build your reorder list</div>';
+  // Menu
+  const preps=getAll().filter(p=>p.cat==='prepared');
+  document.getElementById('hmenu').innerHTML=preps.slice(0,3).map(p=>`
+    <div class="crow" onclick="openD('${p.id}')">
+      <div class="cicon">${p.emoji}</div>
+      <div class="cinfo"><div class="ctitle">${p.name}</div><div class="csub">${p.origin} · ${p.kcal} kcal</div></div>
+      <div class="cright mono">${fmt(p.price)}</div></div>`).join('');
+  // Offers
+  const offs=getOffers();
+  const os=document.getElementById('hos');const oel=document.getElementById('hof');
+  if(offs.length){os.style.display='';oel.innerHTML=offs.slice(0,2).map(o=>`
+    <div class="ofcard"><div class="ofimg">${o.emoji}</div>
+    <div class="ofbody"><div class="ofnm">${o.name}</div>
+    <div class="ofpr"><span class="ofp">${fmt(o.sale)}</span><span class="ofo">${fmt(o.price)}</span></div>
+    <div class="ofsv">Save ${fmt(o.price-o.sale)}</div>
+    <div class="ofex mono">Until ${o.exp}</div></div></div>`).join('')}
+  else os.style.display='none';
+  // New arrivals
+  const ni=region?.newArrivals||[];
+  const ns=document.getElementById('hns');const nel=document.getElementById('hna');
+  if(ni.length){ns.style.display='';nel.innerHTML=ni.map(id=>getP(id)).filter(Boolean).map(p=>`
+    <div class="crow" onclick="openD('${p.id}')">
+      <div class="cicon">${p.emoji}</div>
+      <div class="cinfo"><div class="ctitle">${p.name} <span class="pill pg" style="font-size:9px;padding:2px 6px">NEW</span></div>
+      <div class="csub">${p.origin}</div></div>
+      <div class="cright mono">${fmt(p.price)}</div></div>`).join('')}
+  else ns.style.display='none';
+  updBadge();
+}
+// Wrap renderHome to include additional renders
+(function(){const _o=renderHome;renderHome=function(){_o.apply(this,arguments);renderRunningLow();renderAkebono();renderEditorial()}})()
+
+function isOpen(s){
+  const n=new Date();const[oh,om]=s.open.split(':').map(Number);const[ch,cm]=s.close.split(':').map(Number);
+  const m=n.getHours()*60+n.getMinutes();return m>=oh*60+om&&m<ch*60+cm;
+}
+
+// ═══════════════════════════════════════════════════════════
+// BASKET
+// ═══════════════════════════════════════════════════════════
+function basketTotal(){return basket.reduce((a,i)=>a+i.price*(i.qty||1),0)}
+
+function renderBasket(){
+  const c=document.getElementById('bc'),em=document.getElementById('bem');
+  document.getElementById('bt').textContent=fmt(basketTotal());
+  document.getElementById('cot').textContent=fmt(basketTotal());
+  document.getElementById('cobar').style.display=basket.length?'':'none';
+  c.querySelectorAll('.bitem').forEach(e=>e.remove());
+  if(!basket.length){em.style.display='flex';return}
+  em.style.display='none';
+  basket.forEach((item,idx)=>{
+    const el=document.createElement('div');el.className='bitem';
+    el.innerHTML=`<div class="bemo">${item.emoji}</div>
+      <div class="binfo"><div class="bname">${item.name}</div>
+      <div class="bsub">${fmt(item.price)} each · ${item.origin}</div></div>
+      <div class="qc"><button class="qb" onclick="chq(${idx},-1)">−</button>
+      <div class="qv">${item.qty||1}</div>
+      <button class="qb" onclick="chq(${idx},1)">+</button></div>
+      <div class="bprice">${fmt(item.price*(item.qty||1))}</div>`;
+    c.appendChild(el);
+  });updBadge();
+}
+
+function chq(idx,d){
+  if(!basket[idx])return;
+  basket[idx].qty=Math.max(0,(basket[idx].qty||1)+d);
+  if(basket[idx].qty===0)basket.splice(idx,1);
+  saveM();renderBasket();renderHome();
+}
+
+function qadd(id){
+  const p=getP(id);if(!p)return;
+  const ex=basket.find(i=>i.id===id);
+  if(ex)ex.qty=(ex.qty||1)+1;else basket.push({...p,qty:1});
+  saveM();renderBasket();renderHome();
+  toast(p.emoji,p.name,`${fmt(p.price)} added`);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHECKOUT
+// ═══════════════════════════════════════════════════════════
+function openCO(){
+  const t=basketTotal();
+  document.getElementById('coitems').innerHTML=basket.map(i=>`
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line2);font-size:14px">
+      <span style="color:var(--t1)">${i.emoji} ${i.name}${(i.qty||1)>1?` ×${i.qty}`:''}</span>
+      <span class="mono" style="font-weight:600">${fmt(i.price*(i.qty||1))}</span></div>`).join('');
+  document.getElementById('cototal').textContent=fmt(t);
+  document.getElementById('copay').textContent=fmt(t);
+  document.getElementById('costore').textContent=`${region.name} · ${store.name}`;
+  openS('sco');
+}
+
+function confirmCO(){
+  const receipt={ts:Date.now(),store:`${region.name} · ${store.name}`,items:[...basket.map(i=>({...i}))],total:basketTotal(),region:region.id};
+  hist.unshift(receipt);basket=[];saveM();closeS('sco');
+  renderBasket();renderHome();
+  toast('✓','Purchase complete',`${fmt(receipt.total)} charged to Altura ID`);
+  goTo('home');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SHOP
+// ═══════════════════════════════════════════════════════════
+function renderShop(){
+  const cb=document.getElementById('catbar');
+  cb.innerHTML=CATS.map(c=>`<button class="cbtn${c.id===curCat?' on':''}" onclick="setCat('${c.id}')">${c.lbl}</button>`).join('');
+  renderGrid();
+}
+// Wrap renderShop to include additional setup
+(function(){const _o=renderShop;renderShop=function(){_o.apply(this,arguments);setupAC()}})()
+function setCat(id){curCat=id;renderShop()}
+function filterSearch(){sq=document.getElementById('ssearch')?.value||'';renderGrid()}
+
+function renderGrid(){
+  const q=sq.toLowerCase();
+  const grid=document.getElementById('pgrid');
+  const inB={};basket.forEach(i=>{inB[i.id]=(inB[i.id]||0)+(i.qty||1)});
+  const ofMap={};getOffers().forEach(o=>{ofMap[o.id]=o.sale});
+  const filtered=getAll().filter(p=>{
+    const ck=curCat==='all'||p.cat===curCat;
+    const qk=!q||p.name.toLowerCase().includes(q)||p.origin.toLowerCase().includes(q);
+    const vk=prefs.diet.length===0||
+      (prefs.diet.includes('vegetarian')?!['meat'].includes(p.cat):true)&&
+      (prefs.diet.includes('gluten-free')?!p.allergens?.includes('Gluten'):true);
+    return ck&&qk&&vk;
+  });
+  if(!filtered.length){grid.innerHTML=`<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--t3);font-size:14px">No products found</div>`;return}
+  grid.innerHTML=filtered.map(p=>{
+    const qty=inB[p.id]||0;const sp=ofMap[p.id];const dp=sp||p.price;
+    return`<div class="pcard${p.oos?' oos':''}" onclick="openD('${p.id}')">
+      <div class="pimg">${p.emoji}${p.oos?'<div class="oosbadge">OUT OF STOCK</div>':''}</div>
+      <div class="pbody"><div class="pname">${p.name}</div><div class="porg">${p.origin}</div>
+      <div class="ppr"><div><span class="pprice">${fmt(dp)}</span>${sp?`<span class="pold">${fmt(p.price)}</span>`:''}</div>
+      ${!p.oos?`<button class="abtn${qty?' ib':''}" onclick="event.stopPropagation();qadd('${p.id}')">${qty?'✓'+qty:'+'}</button>`:''}</div></div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRODUCT DETAIL
+// ═══════════════════════════════════════════════════════════
+function openD(id){
+  const p=getP(id);if(!p)return;
+  dqty=1;const isN=notifySet.has(id);
+  const qty=basket.filter(i=>i.id===id).reduce((a,i)=>a+(i.qty||1),0);
+  const sp=document.getElementById('sdet');
+  sp.querySelector('.sp').innerHTML=`<div class="sh"></div>
+    <div class="dimg">${p.emoji}</div>
+    <div class="dbody">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:3px">
+        <div class="dname">${p.name}</div>${p.oos?'<span class="pill pr">Out of stock</span>':''}
+      </div>
+      <div class="dorg">${p.origin}</div><div class="dprice">${fmt(p.price)}</div>
+      <div class="ngrid">
+        <div class="nc"><div class="nv">${p.kcal}</div><div class="nk">Kcal</div></div>
+        <div class="nc"><div class="nv">${p.pro}g</div><div class="nk">Protein</div></div>
+        <div class="nc"><div class="nv">${p.fat}g</div><div class="nk">Fat</div></div>
+        <div class="nc"><div class="nv">${p.carb}g</div><div class="nk">Carbs</div></div>
+      </div>
+      ${p.allergens?.length?`<div style="margin-bottom:14px">${p.allergens.map(a=>`<span class="atag">${a}</span>`).join('')}</div>`:''}
+      ${qty?`<div style="margin-bottom:10px;font-size:13px;color:var(--accent)">✓ ${qty} in basket</div>`:''}
+      ${p.oos?`<button class="notbtn${isN?' on':''}" id="nbtn" onclick="toggleN('${p.id}',this)">
+        ${isN?'🔔 Notifying you':'🔕 Notify me when available'}</button>`:`
+      <div class="dqrow"><div style="font-size:14px;color:var(--t2);flex:1">Quantity</div>
+        <button class="dqb" onclick="sdq(-1)">−</button>
+        <div class="dqv" id="dqv">1</div>
+        <button class="dqb" onclick="sdq(1)">+</button></div>
+      <button class="btn btn-p" onclick="addD('${p.id}')">Add to basket · ${fmt(p.price)}</button>`}
+      <button class="btn-g" style="width:100%;margin-top:8px" onclick="closeS('sdet')">Close</button>
+    </div>`;
+  openS('sdet');
+}
+function sdq(d){dqty=Math.max(1,dqty+d);const e=document.getElementById('dqv');if(e)e.textContent=dqty}
+function addD(id){
+  const p=getP(id);if(!p)return;
+  const ex=basket.find(i=>i.id===id);
+  if(ex)ex.qty=(ex.qty||0)+dqty;else basket.push({...p,qty:dqty});
+  saveM();renderBasket();renderHome();closeS('sdet');
+  toast(p.emoji,p.name,`${dqty}× added · ${fmt(p.price*dqty)}`);
+}
+function toggleN(id,btn){
+  if(notifySet.has(id)){notifySet.delete(id);btn.className='notbtn';btn.textContent='🔕 Notify me when available'}
+  else{notifySet.add(id);btn.className='notbtn on';btn.textContent='🔔 Notifying you'}
+  localStorage.setItem(NK,JSON.stringify([...notifySet]));
+  toast('🔔',notifySet.has(id)?'Alert set':'Removed','');
+}
+
+// ═══════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════
+function renderHistory(){
+  const list=document.getElementById('hlist');
+  if(!hist.length){list.innerHTML=`<div style="padding:60px 24px;text-align:center;color:var(--t3)">
+    <div style="font-size:40px;opacity:.3;margin-bottom:12px">🧾</div>
+    <div style="font-size:15px;font-weight:500;color:var(--t2)">No purchases yet</div>
+    <div style="font-size:13px;margin-top:6px">Your receipts appear here</div></div>`;return}
+  const grps={};
+  hist.forEach(h=>{const k=new Date(h.ts).toLocaleDateString('en-GB',{month:'long',year:'numeric'});if(!grps[k])grps[k]=[];grps[k].push(h)});
+  list.innerHTML=Object.entries(grps).map(([month,items])=>`
+    <div class="hmon">${month}</div>
+    ${items.map(h=>{
+      const r=REGIONS[h.region]||region;
+      return`<div class="hitem" onclick="openRec(${h.ts})">
+        <div class="hico">🛍️</div>
+        <div class="hinfo"><div class="hnm">${h.store}</div>
+        <div class="hdt">${fmtDate(h.ts)} · ${h.items?.reduce((a,i)=>a+(i.qty||1),0)||0} items</div>
+        <div class="hemo">${(h.items||[]).slice(0,6).map(i=>i.emoji).join('')}</div></div>
+        <div class="hamt">${r.cur}${h.total.toFixed(2)}</div></div>`;
+    }).join('')}`).join('');
+}
+
+function openRec(ts){
+  const rec=hist.find(h=>h.ts===ts);if(!rec)return;
+  const r=REGIONS[rec.region]||region;
+  const sp=document.getElementById('srec').querySelector('.sp');
+  let nutHtml='';
+  if(prefs.nutrition){
+    let kcal=0,pro=0,fat=0,carb=0;
+    (rec.items||[]).forEach(i=>{const p=PDB.find(x=>x.id===i.id);if(!p)return;const q=i.qty||1;kcal+=p.kcal*q;pro+=p.pro*q;fat+=p.fat*q;carb+=p.carb*q});
+    nutHtml=`<div style="padding:0 20px 14px"><div class="slabel" style="margin-bottom:8px">Nutritional estimate</div>
+      <div class="ngrid"><div class="nc"><div class="nv">${Math.round(kcal)}</div><div class="nk">Kcal</div></div>
+      <div class="nc"><div class="nv">${pro.toFixed(1)}g</div><div class="nk">Protein</div></div>
+      <div class="nc"><div class="nv">${fat.toFixed(1)}g</div><div class="nk">Fat</div></div>
+      <div class="nc"><div class="nv">${carb.toFixed(1)}g</div><div class="nk">Carbs</div></div></div></div>`;
+  }
+  sp.innerHTML=`<div class="sh"></div><div class="stitle">Receipt</div>
+    <div style="padding:0 20px 4px"><div style="font-size:13px;color:var(--t3);font-family:var(--mono)">${rec.store}</div>
+    <div style="font-size:12px;color:var(--t3);font-family:var(--mono);margin-top:2px">${fmtDate(rec.ts)}</div></div>
+    <div style="padding:12px 20px;border-top:1px solid var(--line2);margin-top:12px">
+      ${(rec.items||[]).map(i=>`
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line2);font-size:14px">
+          <span>${i.emoji} ${i.name}${(i.qty||1)>1?` ×${i.qty}`:''}</span>
+          <span class="mono" style="font-weight:600">${r.cur}${(i.price*(i.qty||1)).toFixed(2)}</span></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;padding:12px 0;font-size:16px;font-weight:700">
+        <span>Total</span><span class="mono" style="color:var(--accent)">${r.cur}${rec.total.toFixed(2)}</span></div>
+    </div>
+    ${nutHtml}
+    <div style="padding:0 20px 32px;display:flex;gap:8px">
+      <button class="btn btn-s" style="font-size:14px" onclick="toast('📋','Dispute raised','Review within 2 hours');closeS('srec')">Dispute</button>
+      <button class="btn btn-s" style="font-size:14px" onclick="reorderRec(${ts})">Reorder all</button>
+    </div>`;
+  openS('srec');
+}
+
+function reorderRec(ts){
+  const rec=hist.find(h=>h.ts===ts);if(!rec)return;
+  (rec.items||[]).forEach(i=>{const p=getP(i.id);if(!p||p.oos)return;
+    const ex=basket.find(b=>b.id===i.id);
+    if(ex)ex.qty=(ex.qty||1)+(i.qty||1);else basket.push({...p,qty:i.qty||1})});
+  saveM();renderBasket();renderHome();closeS('srec');
+  toast('✓','Reordered','Available items added');goTo('basket');
+}
+
+// ═══════════════════════════════════════════════════════════
+// ANALYTICS
+// ═══════════════════════════════════════════════════════════
+function renderAnalytics(){
+  const days=Array.from({length:7},(_,i)=>{
+    const d=new Date();d.setDate(d.getDate()-6+i);
+    const k=d.toDateString();
+    const sp=hist.filter(h=>new Date(h.ts).toDateString()===k).reduce((a,h)=>a+h.total,0);
+    return{lbl:['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()],sp,today:i===6};
+  });
+  const mx=Math.max(...days.map(d=>d.sp),1);
+  document.getElementById('abars').innerHTML=days.map(d=>`
+    <div class="cbw"><div class="abar${d.today?' td':''}" style="height:${Math.max(d.sp/mx*84,d.sp?4:0)}px" title="${fmt(d.sp)}"></div>
+    <div class="clbl">${d.lbl}</div></div>`).join('');
+  const catSp={};
+  hist.forEach(h=>(h.items||[]).forEach(i=>{const p=PDB.find(x=>x.id===i.id);if(p)catSp[p.cat]=(catSp[p.cat]||0)+p.price*(i.qty||1)}));
+  const ctot=Object.values(catSp).reduce((a,b)=>a+b,0)||1;
+  document.getElementById('acats').innerHTML=Object.entries(catSp).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([cat,sp])=>`
+    <div class="mrow"><div class="mdot" style="background:${CATCOLS[cat]||'var(--t3)'}"></div>
+    <div class="mnm">${cat.charAt(0).toUpperCase()+cat.slice(1)}</div>
+    <div class="mpct">${Math.round(sp/ctot*100)}%</div></div>`).join('')||'<div style="font-size:12px;color:var(--t3)">Shop to see breakdown</div>';
+  const ic={};hist.forEach(h=>(h.items||[]).forEach(i=>{ic[i.id]=(ic[i.id]||0)+(i.qty||1)}));
+  document.getElementById('atop').innerHTML=Object.entries(ic).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([id,n])=>{
+    const p=PDB.find(x=>x.id===id);return p?`<div class="crow">
+      <div class="cicon">${p.emoji}</div><div class="cinfo"><div class="ctitle">${p.name}</div><div class="csub">${p.origin}</div></div>
+      <div class="mono" style="font-size:13px;color:var(--t2)">${n}×</div></div>`:''}).join('')||
+    '<div style="padding:16px;font-size:13px;color:var(--t3)">No history yet</div>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROFILE
+// ═══════════════════════════════════════════════════════════
+function renderProfile(){
+  if(!user)return;
+  document.getElementById('pav').textContent=user.avatar||'👤';
+  document.getElementById('pnm').textContent=user.fullName||user.name||'—';
+  document.getElementById('pem').textContent=user.email||'—';
+  document.getElementById('preg').textContent=`${region.name} · Tap to change`;
+  const ts=hist.reduce((a,h)=>a+h.total,0);
+  const ti=hist.reduce((a,h)=>a+(h.items?.reduce((x,i)=>x+(i.qty||1),0)||0),0);
+  document.getElementById('sv').textContent=hist.length;
+  document.getElementById('ssp').textContent=fmt(ts);
+  document.getElementById('sit').textContent=ti;
+  syncToggles();renderAnalytics();
+}
+// Wrap renderProfile — PATCH PROFILE (adds More section with Payment, Household, Meal planner)
+(function(){const _o=renderProfile;renderProfile=function(){_o.apply(this,arguments);
+  const sec=document.getElementById('prof-xsec');if(!sec){
+    const ex=document.createElement('div');ex.id='prof-xsec';ex.style.cssText='padding:0 16px;margin-bottom:16px';
+    ex.innerHTML='<div class="slabel">More</div><div class="card"><div class="crow" onclick="openPay()"><div class="ctitle">Payment methods</div><div class="cright">→</div></div><div class="crow" onclick="openHH()"><div class="ctitle">Household</div><div class="cright">→</div></div><div class="crow" onclick="openMealPlan()"><div class="ctitle">Meal planner</div><div class="cright">→</div></div></div>';
+    const acctSec=document.querySelector('#sc-profile .sec:last-of-type');if(acctSec)acctSec.insertAdjacentElement('beforebegin',ex);}
+}})()
+
+function syncToggles(){
+  ['nutrition','reorder','notifs'].forEach(k=>{
+    const e=document.getElementById('tg-'+k);if(e)e.className='tog'+(prefs[k]?' on':'');
+  });
+  document.querySelectorAll('[data-diet]').forEach(b=>{
+    b.classList.toggle('on',prefs.diet?.includes(b.dataset.diet));
+  });
+}
+function tglPref(k){prefs[k]=!prefs[k];syncToggles();saveP();
+  toast(prefs[k]?'✓':'○',k.charAt(0).toUpperCase()+k.slice(1),prefs[k]?'Enabled':'Disabled')}
+function tglDiet(f){
+  if(!prefs.diet)prefs.diet=[];
+  const i=prefs.diet.indexOf(f);if(i>=0)prefs.diet.splice(i,1);else prefs.diet.push(f);
+  syncToggles();saveP();renderGrid();
+  toast('🥗','Filters',prefs.diet.length?prefs.diet.join(', '):'None active');
+}
+
+// ═══════════════════════════════════════════════════════════
+// REGION SWITCHER
+// ═══════════════════════════════════════════════════════════
+function openRegSwitcher(){
+  const sp=document.getElementById('sreg').querySelector('.sp');
+  sp.innerHTML=`<div class="sh"></div><div class="stitle">Change region</div>
+    <div style="padding:0 16px 8px;font-size:12px;color:var(--t3)">Your basket and history are saved per device.</div>
+    ${Object.values(REGIONS).map(r=>`
+      <div class="crow" onclick="switchReg('${r.id}')">
+        <div class="cicon" style="background:rgba(${r.rgb},.15);color:${r.accent};font-size:16px">●</div>
+        <div class="cinfo"><div class="ctitle">${r.name}</div><div class="csub">${r.country} · ${r.tagline}</div></div>
+        ${r.id===region.id?`<div class="cright" style="color:var(--accent)">✓</div>`:'<div class="cright">→</div>'}
+      </div>`).join('')}
+    <div style="height:24px"></div>`;
+  openS('sreg');
+}
+function switchReg(id){
+  setRegion(REGIONS[id]);store=region.stores[0];
+  closeS('sreg');renderHome();renderShop();renderProfile();
+  toast('📍',region.name,`Switched to ${region.name}`);
+}
+
+// ═══════════════════════════════════════════════════════════
+// FLOOR MAP
+// ═══════════════════════════════════════════════════════════
+function showMap(){
+  const sp=document.getElementById('smap').querySelector('.sp');
+  const bCats=new Set(basket.map(i=>i.cat));
+  const zones=[
+    {lbl:'Produce',emoji:'🥦',t:'8%',l:'5%',w:'28%',h:'36%'},
+    {lbl:'Meat',emoji:'🥩',t:'8%',l:'36%',w:'28%',h:'36%'},
+    {lbl:'Bakery',emoji:'🍞',t:'8%',l:'67%',w:'28%',h:'36%'},
+    {lbl:'Dairy',emoji:'🥛',t:'50%',l:'5%',w:'28%',h:'36%'},
+    {lbl:'Pantry',emoji:'🫙',t:'50%',l:'36%',w:'28%',h:'36%'},
+    {lbl:'Prepared',emoji:'🍱',t:'50%',l:'67%',w:'28%',h:'36%'},
+  ];
+  sp.innerHTML=`<div class="sh"></div><div class="stitle">Floor layout · ${store.name}</div>
+    <div style="padding:0 16px 10px;font-size:12px;color:var(--t3)">Highlighted zones have items in your basket.</div>
+    <div class="fmap" style="margin:0 16px 20px;height:240px">
+      ${zones.map(z=>`<div class="mzone${bCats.has(z.lbl.toLowerCase())||bCats.has(z.lbl.toLowerCase().replace('ery',''))?' hl':''}"
+        style="top:${z.t};left:${z.l};width:${z.w};height:${z.h}"
+        onclick="setCat('${z.lbl.toLowerCase()}');closeS('smap');goTo('shop')">
+        <div class="mzico">${z.emoji}</div><div>${z.lbl}</div></div>`).join('')}
+      <div class="myou" style="bottom:8%;right:8%"></div>
+      <div style="position:absolute;bottom:6%;left:50%;transform:translateX(-50%);font-size:9px;color:var(--t3);font-family:var(--mono)">EXIT →</div>
+    </div>
+    <div style="padding:0 16px 32px"><button class="btn btn-s" onclick="closeS('smap')">Close</button></div>`;
+  openS('smap');
+}
+
+// ═══════════════════════════════════════════════════════════
+// QR
+// ═══════════════════════════════════════════════════════════
+function showQR(){
+  document.getElementById('qru').textContent=(user?.name||'GUEST').toUpperCase()+' · ALTURA ID';
+  document.getElementById('qrsi').textContent=`${store.name} · ${region.name}`;
+  document.getElementById('qrov').classList.add('show');
+  drawQR(document.getElementById('qrc'));
+  // Simulate scan — trigger in-store mode 10s after QR appears
+  clearTimeout(window._qrTimer);
+  window._qrTimer = setTimeout(function() {
+    if (!document.getElementById('qrov').classList.contains('show')) return;
+    // Flash the QR green briefly
+    const card = document.querySelector('.qrcard');
+    if (card) { card.style.boxShadow = '0 0 0 4px #9ddb5e'; card.style.transition = 'box-shadow .2s'; }
+    setTimeout(function() {
+      closeQR();
+      const bar = document.getElementById('instore-bar');
+      if (bar) bar.classList.add('show');
+      toast('✓', 'Entry confirmed', 'Welcome · ' + (store.name || region.name));
+      goTo('home');
+    }, 400);
+  }, 10000);
+}
+function closeQR(){
+  clearTimeout(window._qrTimer);
+  document.getElementById('qrov').classList.remove('show');
+  const card = document.querySelector('.qrcard');
+  if (card) card.style.boxShadow = '';
+}
+function drawQR(cv){
+  const ctx=cv.getContext('2d'),S=200,C=10,N=S/C;
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,S,S);
+  const seed=(user?.email||'g').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const rng=i=>((seed*9301+i*49297)%233280)/233280;
+  ctx.fillStyle='#09090b';
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const inF=(r<8&&c<8)||(r<8&&c>=N-8)||(r>=N-8&&c<8);
+    if(inF){const fr=r<8?r:r-(N-8),fc=c<8?c:c-(N-8);
+      if(fr===0||fr===7||fc===0||fc===7||(fr>=2&&fr<=5&&fc>=2&&fc<=5))ctx.fillRect(c*C,r*C,C,C);
+    }else if(rng(r*N+c)>.5)ctx.fillRect(c*C,r*C,C,C);
+  }
+  ctx.fillStyle=region.accent;ctx.fillRect(S/2-10,S/2-10,20,20);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SHEETS & UTILS
+// ═══════════════════════════════════════════════════════════
+function openS(id){document.getElementById(id)?.classList.add('show')}
+function closeS(id){document.getElementById(id)?.classList.remove('show')}
+function saveM(){localStorage.setItem(MK,JSON.stringify({basket,history:hist}))}
+function saveP(){localStorage.setItem(PK,JSON.stringify(prefs))}
+function fmtDate(ts){return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+let _tt=null;
+function toast(icon,title,sub,dur=3000){
+  document.getElementById('tico').textContent=icon;
+  document.getElementById('ttit').textContent=title;
+  document.getElementById('tsub').textContent=sub||'';
+  const e=document.getElementById('toast');e.classList.add('show');
+  clearTimeout(_tt);_tt=setTimeout(()=>e.classList.remove('show'),dur);
+}
+function exportData(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify({user,basket,history:hist,prefs,region:region.id,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'}));
+  a.download=`altura-market-${new Date().toISOString().slice(0,10)}.json`;a.click();
+  toast('📦','Exported','');
+}
+window.getMarketLink=()=>{const a=localStorage.getItem(AK);return a?`altura-market.html?aid=${btoa(a)}`:'altura-market.html'};
+init();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     ALTURA PAY + ALL NEW FEATURES
+     ═══════════════════════════════════════════════════════ -->
+<style>
+/* ── TRANSITIONS ── */
+.screen{transition:none}
+.screen.slide-left{animation:sleft .22s cubic-bezier(.4,0,.2,1) both}
+.screen.slide-right{animation:sright .22s cubic-bezier(.4,0,.2,1) both}
+@keyframes sleft{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes sright{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+
+/* ── PULL TO REFRESH ── */
+.ptr-indicator{height:0;overflow:hidden;display:flex;align-items:center;
+  justify-content:center;font-size:12px;color:var(--t3);
+  font-family:var(--mono);letter-spacing:.08em;transition:height .2s;flex-shrink:0}
+.ptr-indicator.show{height:40px}
+
+/* ── ALTURA PAY CARD ── */
+.ap-card{margin:0 16px;border-radius:16px;padding:20px;
+  background:linear-gradient(135deg,#0d1a0d 0%,#0a1a0a 40%,#0d120d 100%);
+  border:1px solid rgba(157,219,94,.2);position:relative;overflow:hidden;margin-bottom:16px}
+.ap-card::before{content:'';position:absolute;top:-40px;right:-40px;
+  width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(circle,rgba(157,219,94,.08) 0%,transparent 70%)}
+.ap-card::after{content:'';position:absolute;bottom:-60px;left:-20px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(157,219,94,.05) 0%,transparent 70%)}
+.ap-logo{font-family:var(--mono);font-size:10px;letter-spacing:.2em;
+  color:rgba(157,219,94,.6);text-transform:uppercase;margin-bottom:16px}
+.ap-bal-label{font-size:11px;color:rgba(255,255,255,.4);font-family:var(--mono);
+  letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.ap-balance{font-size:36px;font-weight:700;letter-spacing:-.04em;
+  color:#fff;font-family:var(--mono);margin-bottom:4px}
+.ap-cashback{font-size:11px;color:rgba(157,219,94,.7);margin-bottom:20px;font-family:var(--mono)}
+.ap-name{font-size:12px;color:rgba(255,255,255,.5);letter-spacing:.06em;font-family:var(--mono)}
+.ap-actions{display:flex;gap:8px;margin-top:14px}
+.ap-action-btn{flex:1;padding:10px;border-radius:10px;background:rgba(157,219,94,.1);
+  border:1px solid rgba(157,219,94,.2);color:var(--g);font-size:12px;font-weight:600;
+  cursor:pointer;font-family:inherit;text-align:center;transition:all .1s}
+.ap-action-btn:active{background:rgba(157,219,94,.2)}
+
+/* ── TOPUP AMOUNTS ── */
+.topup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.topup-btn{padding:13px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);
+  color:var(--t0);font-size:16px;font-weight:700;font-family:var(--mono);
+  cursor:pointer;transition:all .12s}
+.topup-btn.sel{background:var(--accent2);border-color:rgba(var(--accentRGB),.3);color:var(--accent)}
+.topup-btn:active{opacity:.8}
+
+/* ── TRANSACTION FEED ── */
+.txn-row{display:flex;align-items:center;gap:12px;padding:13px 20px;
+  border-bottom:1px solid var(--line2)}
+.txn-row:last-child{border-bottom:none}
+.txn-ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;
+  justify-content:center;font-size:18px;flex-shrink:0}
+.txn-ico.spend{background:rgba(204,74,74,.1)}
+.txn-ico.topup{background:rgba(157,219,94,.1)}
+.txn-ico.cb{background:rgba(224,184,74,.1)}
+.txn-info{flex:1;min-width:0}
+.txn-name{font-size:14px;font-weight:500;color:var(--t0)}
+.txn-date{font-size:11px;color:var(--t3);font-family:var(--mono);margin-top:1px}
+.txn-amt{font-family:var(--mono);font-size:15px;font-weight:700}
+.txn-amt.neg{color:var(--t0)}
+.txn-amt.pos{color:var(--g)}
+
+/* ── ORDER TRACKING ── */
+.otk-timeline{padding:20px}
+.otk-step{display:flex;gap:14px;margin-bottom:0}
+.otk-step-left{display:flex;flex-direction:column;align-items:center;gap:0}
+.otk-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;
+  border:2px solid var(--line);background:var(--bg2);transition:all .3s}
+.otk-dot.done{background:var(--accent);border-color:var(--accent)}
+.otk-dot.active{background:var(--bg);border-color:var(--accent);
+  box-shadow:0 0 0 4px rgba(var(--accentRGB),.2)}
+.otk-line{width:2px;flex:1;background:var(--line);min-height:32px;transition:background .3s}
+.otk-line.done{background:var(--accent)}
+.otk-step-right{padding-bottom:28px;flex:1}
+.otk-step-label{font-size:14px;font-weight:600;margin-bottom:2px;color:var(--t0)}
+.otk-step-sub{font-size:12px;color:var(--t3)}
+
+/* ── DELIVERY SLOTS ── */
+.dslot-btn{padding:11px 14px;border-radius:10px;background:var(--bg2);
+  border:1px solid var(--line);color:var(--t1);font-size:13px;cursor:pointer;
+  font-family:inherit;transition:all .12s;text-align:left}
+.dslot-btn.sel{background:var(--accent2);border-color:rgba(var(--accentRGB),.3);color:var(--accent)}
+.dslot-time{font-weight:700;display:block;margin-bottom:1px}
+.dslot-price{font-size:11px;color:var(--t3)}
+.dslot-price.free{color:var(--g)}
+
+/* ── RECENTLY VIEWED ── */
+.rv-scroll{display:flex;gap:10px;overflow-x:auto;padding:0 16px 12px;scrollbar-width:none}
+.rv-scroll::-webkit-scrollbar{display:none}
+.rv-item{flex-shrink:0;width:72px;cursor:pointer;text-align:center}
+.rv-emoji{width:64px;height:64px;border-radius:14px;background:var(--bg2);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:28px;margin-bottom:5px;transition:border-color .12s}
+.rv-item:active .rv-emoji{border-color:var(--accent)}
+.rv-name{font-size:10px;color:var(--t2);line-height:1.3;display:-webkit-box;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── COMPARE ── */
+.cmp-col{flex:1;text-align:center}
+.cmp-nut{padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px}
+.cmp-nut:last-child{border-bottom:none}
+.cmp-val{font-weight:700;font-family:var(--mono)}
+.cmp-key{font-size:10px;color:var(--t3);margin-top:1px}
+
+/* ── REVIEWS ── */
+.stars{color:#e0b84a;letter-spacing:2px;font-size:14px}
+.review-row{padding:12px 0;border-bottom:1px solid var(--line2)}
+.review-row:last-child{border-bottom:none}
+.review-author{font-size:12px;font-weight:600;color:var(--t0);margin-bottom:3px}
+.review-body{font-size:12px;color:var(--t2);line-height:1.6}
+
+/* ── PAIRS WELL ── */
+.pw-row{display:flex;gap:8px;overflow-x:auto;padding:0;scrollbar-width:none;margin-bottom:14px}
+.pw-row::-webkit-scrollbar{display:none}
+.pw-chip{flex-shrink:0;padding:7px 12px;border-radius:20px;background:var(--bg2);
+  border:1px solid var(--line);font-size:12px;color:var(--t1);cursor:pointer;
+  display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .12s}
+.pw-chip:active{border-color:var(--accent);color:var(--accent)}
+
+/* ── BUDGET ── */
+.budget-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:8px 0 4px}
+.budget-fill{height:100%;border-radius:3px;transition:width .4s ease,background .3s}
+
+/* ── POINTS ── */
+.pts-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(224,184,74,.1);
+  border:1px solid rgba(224,184,74,.2);border-radius:20px;padding:5px 12px;
+  font-size:13px;color:var(--amber);font-weight:600;font-family:var(--mono)}
+
+/* ── BACK IN STOCK BANNER ── */
+.bis-banner{margin:0 16px 12px;background:rgba(157,219,94,.08);border:1px solid rgba(157,219,94,.2);
+  border-radius:12px;padding:12px 16px;display:none}
+.bis-banner.show{display:block}
+</style>
+
+<script>
+// ═══ ALTURA PAY ═══════════════════════════════════════════════════════════════
+const APK = 'altura_pay_v2';
+let apState = { balance: 50.00, points: 0, txns: [] };
+
+function loadAP() {
+  try { const d = JSON.parse(localStorage.getItem(APK)); if (d) apState = d; } catch {}
+}
+function saveAP() { localStorage.setItem(APK, JSON.stringify(apState)); }
+
+function apFmt(n) { return (region?.cur || '$') + Math.abs(n).toFixed(2); }
+
+function isAPDefault() {
+  try { const pays = JSON.parse(localStorage.getItem('altura_pay') || '[]'); return !pays.length || pays.find(p => p.def)?.id === 'aid'; } catch { return true; }
+}
+
+// Instant checkout if AP is default and has balance
+function tryInstantCheckout() {
+  const total = basketTotal();
+  if (!isAPDefault()) return false;
+  if (apState.balance < total) {
+    toast('⚠', 'Insufficient balance', `Top up ${apFmt(total - apState.balance)} needed`);
+    return false;
+  }
+  return true;
+}
+
+function doAPCheckout() {
+  const total = basketTotal();
+  // Deduct
+  apState.balance = Math.max(0, apState.balance - total);
+  // Cashback: 3% on own-brand (Altura), 1% on everything else
+  let cb = 0;
+  basket.forEach(i => {
+    const rate = (i.origin || '').toLowerCase().includes('altura') ? 0.03 : 0.01;
+    cb += i.price * (i.qty || 1) * rate;
+  });
+  cb = Math.round(cb * 100) / 100;
+  apState.balance = Math.round((apState.balance + cb) * 100) / 100;
+  apState.points = (apState.points || 0) + Math.floor(total);
+  // Transaction
+  apState.txns.unshift({ ts: Date.now(), type: 'spend', amt: -total, label: `${store.name}`, items: basket.length });
+  if (cb > 0) apState.txns.unshift({ ts: Date.now() + 1, type: 'cb', amt: cb, label: '1–3% cashback' });
+  apState.txns = apState.txns.slice(0, 100);
+  saveAP();
+  // Create receipt
+  const receipt = { ts: Date.now(), store: `${region.name} · ${store.name}`, items: [...basket.map(i => ({...i}))], total, region: region.id, status: 'delivered', slot: window._selectedSlot || 'Express' };
+  hist.unshift(receipt);
+  orders.unshift({ ...receipt, status: 'placed', statusTs: Date.now() });
+  basket = [];
+  saveM(); saveOrders();
+  return { total, cb };
+}
+
+// Open AP screen
+function openAP() {
+  loadAP();
+  const sp = document.getElementById('sap').querySelector('.sp');
+  const bal = apState.balance;
+  const pts = apState.points || 0;
+  sp.innerHTML = `
+    <div class="sh"></div>
+    <div style="padding:16px 20px 0">
+      <div class="ap-card">
+        <div class="ap-logo">A↑ ALTURA PAY</div>
+        <div class="ap-bal-label">Available balance</div>
+        <div class="ap-balance">${(region?.cur||'$')}${bal.toFixed(2)}</div>
+        <div class="ap-cashback">+ ${apFmt(apState.txns.filter(t=>t.type==='cb').reduce((a,t)=>a+t.amt,0))} cashback earned</div>
+        <div class="ap-name">${(user?.name||'—').toUpperCase()}</div>
+        <div class="ap-actions">
+          <button class="ap-action-btn" onclick="openTopup()">Top up</button>
+          <button class="ap-action-btn" onclick="renderTxns()">Transactions</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 14px">
+        <span class="pts-pill">★ ${pts.toLocaleString()} Altura Points</span>
+        <span style="font-size:12px;color:var(--t3)">1pt per ${region?.cur||'$'}1 spent</span>
+      </div>
+    </div>
+    <div id="ap-txns-area">
+      <div class="slabel" style="padding:0 20px;margin-bottom:10px">Recent transactions</div>
+      ${renderTxnsInner()}
+    </div>
+    <div style="padding:16px 20px 32px">
+      <button class="btn btn-s" onclick="closeS('sap')">Close</button>
+    </div>`;
+  openS('sap');
+}
+
+function renderTxnsInner() {
+  if (!apState.txns.length) return '<div style="padding:0 20px 16px;font-size:13px;color:var(--t3)">No transactions yet</div>';
+  return '<div class="card" style="margin:0 16px 16px">' + apState.txns.slice(0, 20).map(t => `
+    <div class="txn-row">
+      <div class="txn-ico ${t.type==='spend'?'spend':t.type==='cb'?'cb':'topup'}">${t.type==='spend'?'🛒':t.type==='cb'?'★':'↑'}</div>
+      <div class="txn-info">
+        <div class="txn-name">${t.label}</div>
+        <div class="txn-date">${fmtDate(t.ts)}</div>
+      </div>
+      <div class="txn-amt ${t.amt>=0?'pos':'neg'}">${t.amt>=0?'+':''}${apFmt(t.amt)}</div>
+    </div>`).join('') + '</div>';
+}
+
+function renderTxns() {
+  const area = document.getElementById('ap-txns-area');
+  if (area) area.innerHTML = '<div class="slabel" style="padding:0 20px;margin-bottom:10px">All transactions</div>' + renderTxnsInner();
+}
+
+// ═══ TOP-UP FLOW ═══════════════════════════════════════════════════════════
+let _topupAmt = 0;
+function openTopup() {
+  closeS('sap');
+  const sp = document.getElementById('stopup').querySelector('.sp');
+  const amts = [10, 20, 50, 100, 200];
+  sp.innerHTML = `
+    <div class="sh"></div>
+    <div class="stitle">Top up Altura Pay</div>
+    <div style="padding:0 20px 16px">
+      <div style="font-size:13px;color:var(--t3);margin-bottom:16px">Current balance: <span style="color:var(--accent);font-weight:700">${(region?.cur||'$')}${apState.balance.toFixed(2)}</span></div>
+      <div class="slabel" style="margin-bottom:10px">Choose amount</div>
+      <div class="topup-grid">
+        ${amts.map(a => `<button class="topup-btn" onclick="_topupAmt=${a};document.querySelectorAll('.topup-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${(region?.cur||'$')}${a}</button>`).join('')}
+        <button class="topup-btn" onclick="_topupAmt=0;document.getElementById('topup-custom').style.display='';this.classList.add('sel');document.getElementById('topup-custom').focus()">Custom</button>
+      </div>
+      <input class="inp" id="topup-custom" type="number" placeholder="Enter amount" style="display:none;margin-bottom:14px" oninput="_topupAmt=parseFloat(this.value)||0"/>
+      <div class="slabel" style="margin-bottom:10px">Pay with</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="crow"><div class="cicon" style="background:rgba(157,219,94,.1);color:var(--g);font-size:12px;font-weight:700">CARD</div>
+        <div class="cinfo"><div class="ctitle">Default card</div><div class="csub">Charged immediately</div></div>
+        <div class="cright" style="color:var(--accent)">✓</div></div>
+      </div>
+      <button class="btn btn-p" onclick="confirmTopup()" style="margin-bottom:10px">Add to Altura Pay</button>
+      <button class="btn btn-s" onclick="closeS('stopup');openAP()">Cancel</button>
+    </div>`;
+  openS('stopup');
+}
+
+function confirmTopup() {
+  const amt = _topupAmt;
+  if (!amt || amt < 1) { toast('ℹ', 'Choose an amount', ''); return; }
+  apState.balance = Math.round((apState.balance + amt) * 100) / 100;
+  apState.txns.unshift({ ts: Date.now(), type: 'topup', amt, label: 'Top up via card' });
+  saveAP();
+  closeS('stopup');
+  toast('✓', `${(region?.cur||'$')}${amt.toFixed(2)} added`, `Balance: ${(region?.cur||'$')}${apState.balance.toFixed(2)}`);
+  setTimeout(openAP, 200);
+}
+
+// ═══ ORDEN TRACKING ═══════════════════════════════════════════════════════════
+const OK = 'altura_orders_v2';
+let orders = [];
+const ORDER_STEPS = ['placed','picking','out','delivered'];
+const ORDER_LABELS = {
+  placed:   ['Order placed',      'Confirmed and queued'],
+  picking:  ['Being picked',      'Our team is gathering your items'],
+  out:      ['Out for delivery',  'On the way to you now'],
+  delivered:['Delivered',         'Your order has arrived'],
+};
+const ORDER_TIMES = [0, 3, 18, 35]; // minutes after placed
+
+function loadOrders() {
+  try { orders = JSON.parse(localStorage.getItem(OK) || '[]'); } catch {}
+  // Auto-advance statuses
+  orders.forEach(o => {
+    if (o.status === 'delivered') return;
+    const idx = ORDER_STEPS.indexOf(o.status);
+    const mins = (Date.now() - o.statusTs) / 60000;
+    const next = ORDER_TIMES.slice(idx + 1);
+    let newIdx = idx;
+    next.forEach((t, i) => { if (mins >= t) newIdx = idx + 1 + i; });
+    newIdx = Math.min(newIdx, ORDER_STEPS.length - 1);
+    if (newIdx !== idx) { o.status = ORDER_STEPS[newIdx]; }
+  });
+}
+function saveOrders() { localStorage.setItem(OK, JSON.stringify(orders)); }
+
+function openOrderTracking(ts) {
+  loadOrders();
+  const order = orders.find(o => o.ts === ts);
+  if (!order) return;
+  const stepIdx = ORDER_STEPS.indexOf(order.status);
+  const sp = document.getElementById('sotrack').querySelector('.sp');
+  sp.innerHTML = `
+    <div class="sh"></div>
+    <div class="stitle">Order tracking</div>
+    <div style="padding:0 20px 6px;font-size:12px;color:var(--t3);font-family:var(--mono)">${order.store} · ${fmtDate(order.ts)}</div>
+    <div style="padding:0 20px 16px;font-size:12px;color:var(--t3)">Slot: <span style="color:var(--t1)">${order.slot || 'Express'}</span></div>
+    <div class="otk-timeline">
+      ${ORDER_STEPS.map((s, i) => {
+        const done = i < stepIdx;
+        const active = i === stepIdx;
+        const last = i === ORDER_STEPS.length - 1;
+        const [lbl, sub] = ORDER_LABELS[s];
+        return `<div class="otk-step">
+          <div class="otk-step-left">
+            <div class="otk-dot ${done ? 'done' : active ? 'active' : ''}"></div>
+            ${!last ? `<div class="otk-line ${done ? 'done' : ''}"></div>` : ''}
+          </div>
+          <div class="otk-step-right">
+            <div class="otk-step-label" style="color:${active ? 'var(--accent)' : done ? 'var(--t0)' : 'var(--t3)'}\">${lbl}</div>
+            <div class="otk-step-sub" style="color:${active ? 'var(--t2)' : 'var(--t3)'}\">${sub}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="padding:0 20px;margin-bottom:14px">
+      <div class="card">
+        ${(order.items || []).slice(0, 4).map(i => `<div class="crow" style="padding:10px 16px">
+          <div class="cicon" style="font-size:18px">${i.emoji}</div>
+          <div class="cinfo"><div class="ctitle">${i.name}</div></div>
+          <div class="cright mono">${(REGIONS[order.region]||region).cur}${(i.price*(i.qty||1)).toFixed(2)}</div>
+        </div>`).join('')}
+        ${order.items.length > 4 ? `<div style="padding:8px 16px;font-size:12px;color:var(--t3)">+${order.items.length-4} more items</div>` : ''}
+      </div>
+    </div>
+    <div style="padding:0 20px 32px;display:flex;gap:8px">
+      <button class="btn btn-s" onclick="reorderRec(${ts})">Reorder</button>
+      <button class="btn btn-s" onclick="closeS('sotrack')">Close</button>
+    </div>`;
+  openS('sotrack');
+  // Auto-refresh
+  clearInterval(window._trackTimer);
+  window._trackTimer = setInterval(() => { loadOrders(); const o=orders.find(x=>x.ts===ts); if(o?.status==='delivered'){clearInterval(window._trackTimer)}; openOrderTracking(ts); }, 15000);
+}
+
+// ═══ DELIVERY SLOTS ═══════════════════════════════════════════════════════════
+let _selectedSlot = null;
+
+function openDeliverySlots(onConfirm) {
+  const now = new Date();
+  const h = now.getHours();
+  const slots = [];
+  // Today slots (if before 8pm)
+  if (h < 18) slots.push({ label: 'Today', time: '12:00 – 14:00', free: false, price: 2.99 });
+  if (h < 20) slots.push({ label: 'Today', time: '16:00 – 18:00', free: false, price: 2.99 });
+  if (h < 21) slots.push({ label: 'Today', time: '19:00 – 21:00', free: h < 16, price: h < 16 ? 0 : 1.99 });
+  // Tomorrow
+  ['07:00 – 09:00','10:00 – 12:00','13:00 – 15:00','17:00 – 19:00','20:00 – 22:00'].forEach(t => {
+    slots.push({ label: 'Tomorrow', time: t, free: true, price: 0 });
+  });
+
+  const sp = document.getElementById('sslots').querySelector('.sp');
+  sp.innerHTML = `
+    <div class="sh"></div>
+    <div class="stitle">Choose delivery slot</div>
+    <div style="padding:0 20px 14px;font-size:13px;color:var(--t3)">Select when you'd like your order delivered.</div>
+    <div style="display:flex;flex-direction:column;gap:8px;padding:0 20px;margin-bottom:20px">
+      ${slots.map((s, i) => `
+        <button class="dslot-btn" onclick="_selectedSlot='${s.label} ${s.time}';document.querySelectorAll('.dslot-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <span style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px">${s.label}</span>
+              <span class="dslot-time">${s.time}</span>
+            </div>
+            <span class="dslot-price ${s.free?'free'}">${s.free ? 'Free' : '+ ' + (region?.cur||'$') + s.price.toFixed(2)}</span>
+          </div>
+        </button>`).join('')}
+    </div>
+    <div style="padding:0 20px 32px;display:flex;gap:8px">
+      <button class="btn btn-p" onclick="if(!_selectedSlot){toast('ℹ','Choose a slot','');return}closeS('sslots');openCO()">Confirm slot</button>
+      <button class="btn btn-s" onclick="closeS('sslots')">Cancel</button>
+    </div>`;
+  openS('sslots');
+}
+
+// ═══ PATCH CHECKOUT ═══════════════════════════════════════════════════════════
+(function() {
+  const _origCO = openCO;
+  openCO = function() {
+    // If AP is default, do instant checkout
+    if (isAPDefault() && tryInstantCheckout()) {
+      const { total, cb } = doAPCheckout();
+      renderBasket(); renderHome(); renderProfile();
+      toast('✓', `${(region?.cur||'$')}${total.toFixed(2)} paid`, cb > 0 ? `+ ${(region?.cur||'$')}${cb.toFixed(2)} cashback` : 'Charged to Altura Pay');
+      // Show order tracking after brief delay
+      setTimeout(() => {
+        loadOrders();
+        if (orders.length) openOrderTracking(orders[0].ts);
+      }, 800);
+      goTo('home');
+    } else {
+      if (!_selectedSlot) { openDeliverySlots(); return; }
+      _origCO();
+    }
+  };
+  const _origConfirmCO = confirmCO;
+  confirmCO = function() {
+    if (isAPDefault() && tryInstantCheckout()) {
+      doAPCheckout(); closeS('sco');
+      renderBasket(); renderHome();
+      toast('✓', 'Purchase complete', '');
+      setTimeout(() => { loadOrders(); if(orders.length) openOrderTracking(orders[0].ts); }, 500);
+      goTo('home');
+    } else {
+      _origConfirmCO();
+      loadOrders(); if(orders.length) openOrderTracking(orders[0].ts);
+    }
+  };
+})();
+
+// Patch checkout to show slot selection first
+const _origBasketCheckout = function() { openDeliverySlots(); };
+
+// ═══ RECENTLY VIEWED ═══════════════════════════════════════════════════════════
+const RV_KEY = 'altura_rv';
+let recentlyViewed = [];
+function loadRV() { try { recentlyViewed = JSON.parse(localStorage.getItem(RV_KEY) || '[]'); } catch {} }
+function addRV(id) {
+  loadRV();
+  recentlyViewed = [id, ...recentlyViewed.filter(x => x !== id)].slice(0, 8);
+  localStorage.setItem(RV_KEY, JSON.stringify(recentlyViewed));
+}
+function renderRV() {
+  loadRV();
+  const el = document.getElementById('hrv');
+  const sec = document.getElementById('hrv-sec');
+  if (!el || !recentlyViewed.length) { if (sec) sec.style.display = 'none'; return; }
+  if (sec) sec.style.display = '';
+  el.innerHTML = recentlyViewed.map(id => {
+    const p = getP(id);
+    return p ? `<div class="rv-item" onclick="openD('${p.id}')">
+      <div class="rv-emoji">${p.emoji}</div>
+      <div class="rv-name">${p.name}</div>
+    </div>` : '';
+  }).join('');
+}
+
+// Patch openD to track recently viewed
+(function() {
+  const _orig = openD;
+  openD = function(id) {
+    addRV(id);
+    _orig(id);
+  };
+})();
+
+// ═══ PRODUCT REVIEWS (seeded) ════════════════════════════════════════════════
+const REVIEWS = {
+  m1:[{auth:'S. Harrington',stars:5,txt:'Exceptional quality. Cooked it medium-rare — absolutely worth every penny.'},{auth:'J. Wolfe',stars:4,txt:'Beautifully marbled. Delivery was faster than expected.'}],
+  m2:[{auth:'T. Park',stars:5,txt:'Best chicken I\\'ve bought online. Incredibly fresh.'},{auth:'R. Ahmad',stars:4,txt:'Good quality, well-packaged. Reordered three times.'}],
+  b1:[{auth:'M. Chen',stars:5,txt:'The sourdough is exceptional. Proper crust, open crumb.'},{auth:'L. Davies',stars:4,txt:'Best bread I\\'ve had delivered. Stays fresh for days.'}],
+  g1:[{auth:'A. Novak',stars:5,txt:'The sage notes are unmistakable. Remarkable honey.'},{auth:'P. Silva',stars:4,txt:'Light and floral. Better than anything at the supermarket.'}],
+  r1:[{auth:'K. Tanaka',stars:5,txt:'Genuinely outstanding ramen. The broth is the real deal.'},{auth:'C. Liu',stars:4,txt:'Pre-ordered and it arrived piping hot. Will order again.'}],
+  r2:[{auth:'Y. Sato',stars:5,txt:'The best bento I\\'ve had outside Japan. Kaiseki quality.'},{auth:'H. Kim',stars:5,txt:'Everything was perfectly portioned and incredibly fresh.'}],
+  d3:[{auth:'F. Whitfield',stars:4,txt:'Good cheddar, well-aged. Excellent on the sourdough.'},{auth:'B. Moore',stars:4,txt:'Proper cheddar with real bite. Would recommend.'}],
+  p4:[{auth:'G. Ellis',stars:5,txt:'Enormous blueberries, incredibly sweet. Best I\\'ve ever had.'},{auth:'O. Patel',stars:4,txt:'Fresh and flavourful. Perfect for porridge.'}],
+};
+
+// ═══ PAIRS WELL DATA ═════════════════════════════════════════════════════════
+const PAIRS = {
+  m1:['d3','b1','g3'],  // ribeye → cheddar, sourdough, olive oil
+  m2:['p5','p1','dr1'], // chicken → spinach, tomatoes, water
+  m3:['b3','g2','p7'],  // bison → rye, salt, carrots
+  b1:['d3','g1','d1'],  // sourdough → cheddar, honey, milk
+  r1:['dr3','p5'],      // ramen → kombucha, spinach
+  r2:['dr2','dr3'],     // bento → cold brew, kombucha
+  p3:['dr1','p5','p6'], // avocado → water, spinach, lemon
+  g3:['m1','p1','b1'],  // olive oil → ribeye, tomatoes, sourdough
+};
+
+// ═══ PATCH openD WITH REVIEWS + PAIRS + UNITS ════════════════════════════════
+(function() {
+  const _origOpenD = openD;
+  openD = function(id) {
+    const p = getP(id); if (!p) return;
+    addRV(id);
+    dqty = 1;
+    const isN = notifySet.has(id);
+    const qty = basket.filter(i => i.id === id).reduce((a, i) => a + (i.qty || 1), 0);
+    const reviews = REVIEWS[id] || [];
+    const avgStars = reviews.length ? Math.round(reviews.reduce((a,r)=>a+r.stars,0)/reviews.length) : 0;
+    const pairs = (PAIRS[id] || []).map(pid => getP(pid)).filter(Boolean);
+    const ofMap = {}; getOffers().forEach(o => { ofMap[o.id] = o.sale; });
+    const salePrice = ofMap[id]; const displayPrice = salePrice || p.price;
+    // Units
+    const UNITS = { pantry: ['100ml','250ml','500ml','1L'], drinks: ['330ml','500ml','1L'], dairy: ['250ml','500ml','1L'] };
+    const unitOpts = UNITS[p.cat];
+    const sp = document.getElementById('sdet');
+    sp.querySelector('.sp').innerHTML = `
+      <div class="sh"></div>
+      <div class="dimg">${p.emoji}</div>
+      <div class="dbody">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:3px">
+          <div class="dname">${p.name}</div>${p.oos ? '<span class="pill pr">Out of stock</span>' : ''}
+        </div>
+        <div class="dorg">${p.origin}</div>
+        ${reviews.length ? `<div style="margin-bottom:10px;display:flex;align-items:center;gap:8px">
+          <span class="stars">${'★'.repeat(avgStars)}${'☆'.repeat(5-avgStars)}</span>
+          <span style="font-size:12px;color:var(--t3)">${reviews.length} review${reviews.length!==1?'s':''}</span>
+        </div>` : ''}
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:14px">
+          <div class="dprice" style="margin-bottom:0">${fmt(displayPrice)}</div>
+          ${salePrice ? `<div style="font-size:14px;color:var(--t3);text-decoration:line-through">${fmt(p.price)}</div>` : ''}
+        </div>
+        <div class="ngrid">
+          <div class="nc"><div class="nv">${p.kcal}</div><div class="nk">Kcal</div></div>
+          <div class="nc"><div class="nv">${p.pro}g</div><div class="nk">Protein</div></div>
+          <div class="nc"><div class="nv">${p.fat}g</div><div class="nk">Fat</div></div>
+          <div class="nc"><div class="nv">${p.carb}g</div><div class="nk">Carbs</div></div>
+        </div>
+        ${p.allergens?.length ? `<div style="margin-bottom:14px">${p.allergens.map(a=>`<span class="atag">${a}</span>`).join('')}</div>` : ''}
+        ${pairs.length ? `<div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--t3);text-transform:uppercase;font-family:var(--mono);margin-bottom:8px">Pairs well with</div>
+          <div class="pw-row">${pairs.map(pw=>`<div class="pw-chip" onclick="closeS('sdet');openD('${pw.id}')">${pw.emoji} ${pw.name}</div>`).join('')}</div>
+        </div>` : ''}
+        ${qty ? `<div style="margin-bottom:10px;font-size:13px;color:var(--accent)">✓ ${qty} in basket</div>` : ''}
+        ${p.oos ? `<button class="notbtn${isN?' on':''}\" onclick=\"toggleN('${p.id}',this)\">${isN?'🔔 Notifying you':'🔕 Notify me when available'}</button>` : `
+          ${unitOpts ? `<div style="margin-bottom:12px">
+            <div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:6px">Size</div>
+            <div style="display:flex;gap:7px">${unitOpts.map((u,i)=>`<button class="cbtn${i===1?' on':''}\" onclick=\"document.querySelectorAll('.unit-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on')\" style=\"font-size:12px;padding:6px 12px\" class=\"unit-opt\">${u}</button>`).join('')}</div>
+          </div>` : ''}
+          <div class="dqrow"><div style="font-size:14px;color:var(--t2);flex:1">Quantity</div>
+            <button class="dqb" onclick="sdq(-1)">−</button>
+            <div class="dqv" id="dqv">1</div>
+            <button class="dqb" onclick="sdq(1)">+</button></div>
+          <button class="btn btn-p" onclick="addD('${p.id}')\">Add to basket · ${fmt(displayPrice)}</button>`}
+        ${reviews.length ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line2)">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--t3);text-transform:uppercase;font-family:var(--mono);margin-bottom:10px">Reviews</div>
+          ${reviews.map(r=>`<div class="review-row">
+            <div class="review-author"><span class="stars" style="font-size:11px">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span> ${r.auth}</div>
+            <div class="review-body">${r.txt}</div>
+          </div>`).join('')}
+        </div>` : ''}
+        <button class="btn-g" style="width:100%;margin-top:12px" onclick="closeS('sdet')">Close</button>
+      </div>`;
+    openS('sdet');
+  };
+})();
+
+// ═══ COMPARE PRODUCTS ════════════════════════════════════════════════════════
+let _cmpA = null, _cmpB = null;
+function openCompare(id) {
+  if (!_cmpA) { _cmpA = id; toast('📊','First product selected','Now tap another to compare'); return; }
+  if (_cmpA === id) { _cmpA = null; return; }
+  _cmpB = id;
+  const pa = getP(_cmpA), pb = getP(_cmpB);
+  _cmpA = null; _cmpB = null;
+  if (!pa || !pb) return;
+  const fields = [{k:'price',lbl:'Price',fmt:v=>fmt(v)},{k:'kcal',lbl:'Calories',fmt:v=>v+' kcal'},{k:'pro',lbl:'Protein',fmt:v=>v+'g'},{k:'fat',lbl:'Fat',fmt:v=>v+'g'},{k:'carb',lbl:'Carbs',fmt:v=>v+'g'},{k:'fib',lbl:'Fibre',fmt:v=>v+'g'}];
+  const sp = document.getElementById('scmp').querySelector('.sp');
+  sp.innerHTML = `
+    <div class="sh"></div>
+    <div class="stitle">Compare</div>
+    <div style="display:flex;padding:0 20px 16px;gap:12px">
+      <div style="flex:1;text-align:center"><div style="font-size:40px;margin-bottom:6px">${pa.emoji}</div><div style="font-size:13px;font-weight:600">${pa.name}</div></div>
+      <div style="font-size:18px;color:var(--t3);padding-top:20px">vs</div>
+      <div style="flex:1;text-align:center"><div style="font-size:40px;margin-bottom:6px">${pb.emoji}</div><div style="font-size:13px;font-weight:600">${pb.name}</div></div>
+    </div>
+    <div class="card" style="margin:0 16px">
+      ${fields.map(f => {
+        const better = f.k === 'price' || ['fat','carb'].includes(f.k);
+        const aVal = pa[f.k], bVal = pb[f.k];
+        const aWins = better ? aVal <= bVal : aVal >= bVal;
+        return `<div style="display:flex;border-bottom:1px solid var(--line2);padding:10px 0">
+          <div style="flex:1;text-align:center;font-family:var(--mono);font-size:14px;font-weight:600;color:${aWins?'var(--accent)':'var(--t2)'}\">${f.fmt(aVal)}</div>
+          <div style="width:60px;text-align:center;font-size:11px;color:var(--t3);padding-top:2px">${f.lbl}</div>
+          <div style="flex:1;text-align:center;font-family:var(--mono);font-size:14px;font-weight:600;color:${!aWins?'var(--accent)':'var(--t2)'}\">${f.fmt(bVal)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="padding:16px 20px 32px;display:flex;gap:8px">
+      <button class="btn btn-p" style="flex:1" onclick="qadd('${pa.id}');closeS('scmp')">Add ${pa.emoji}</button>
+      <button class="btn btn-p" style="flex:1" onclick="qadd('${pb.id}');closeS('scmp')">Add ${pb.emoji}</button>
+    </div>`;
+  openS('scmp');
+}
+
+// Add long-press compare to product cards
+document.addEventListener('contextmenu', e => {
+  const card = e.target.closest('.pcard');
+  if (!card) return;
+  e.preventDefault();
+  const id = card.querySelector('.abtn')?.getAttribute('onclick')?.match(/'([^']+)'/)?.[1] || 
+             card.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+  if (id) openCompare(id);
+});
+
+// ═══ SPEND BUDGET ════════════════════════════════════════════════════════════
+const BUD_KEY = 'altura_budget';
+function getBudget() { try { return parseFloat(localStorage.getItem(BUD_KEY)) || 0; } catch { return 0; } }
+function setBudget(v) { localStorage.setItem(BUD_KEY, v); }
+
+function renderBudget(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const budget = getBudget();
+  if (!budget) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  const now = Date.now(), weekAgo = now - 7 * 86400000;
+  const spent = hist.filter(h => h.ts > weekAgo).reduce((a, h) => a + h.total, 0);
+  const pct = Math.min(spent / budget * 100, 100);
+  const over = spent > budget;
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+      <span style="font-size:12px;color:var(--t2)">Weekly budget</span>
+      <span style="font-family:var(--mono);font-size:12px;color:${over?'var(--red)':'var(--t2)'}"> ${fmt(spent)} / ${fmt(budget)}</span>
+    </div>
+    <div class="budget-bar">
+      <div class="budget-fill" style="width:${pct}%;background:${over?'var(--red)':pct>80?'var(--amber)':'var(--accent)'}\"></div>
+    </div>
+    <div style="font-size:11px;color:${over?'var(--red)':'var(--t3)'}"> ${over?fmt(spent-budget)+' over budget':fmt(budget-spent)+' remaining'}</div>`;
+}
+
+function openBudgetSetter() {
+  const cur = getBudget();
+  const sp = document.getElementById('sbud').querySelector('.sp');
+  sp.innerHTML = `
+    <div class="sh"></div>
+    <div class="stitle">Weekly budget</div>
+    <div style="padding:0 20px 16px">
+      <div style="font-size:13px;color:var(--t3);margin-bottom:16px">Set a weekly spend limit. We'll show your progress on the home screen and basket.</div>
+      <input class="inp" id="bud-inp" type="number" placeholder="e.g. 100" value="${cur||''}" inputmode="decimal" style="margin-bottom:14px"/>
+      <button class="btn btn-p" onclick="setBudget(parseFloat(document.getElementById('bud-inp').value)||0);closeS('sbud');renderHome();toast('✓','Budget set',fmt(parseFloat(document.getElementById('bud-inp')?.value)||0)+' per week')" style="margin-bottom:10px">Save budget</button>
+      ${cur ? `<button class="btn btn-s" onclick="setBudget(0);closeS('sbud');renderHome();toast('○','Budget removed','')">Remove budget</button>` : ''}
+    </div>`;
+  openS('sbud');
+}
+
+// ═══ BACK IN STOCK BANNERS ════════════════════════════════════════════════════
+function checkBackInStock() {
+  const el = document.getElementById('bis-banner');
+  if (!el) return;
+  // Simulate some products coming back in stock
+  const nowBack = [...notifySet].filter(id => {
+    const p = PDB.find(x => x.id === id);
+    // For demo: m4 (lamb) comes back 30s after notifying
+    const notifyTs = JSON.parse(localStorage.getItem('altura_notify_ts') || '{}');
+    return p && p.oos && notifyTs[id] && (Date.now() - notifyTs[id]) > 30000;
+  });
+  if (nowBack.length) {
+    el.classList.add('show');
+    el.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--g);margin-bottom:4px">Back in stock</div>
+      ${nowBack.map(id => { const p = PDB.find(x=>x.id===id); return p ? `<div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:13px">${p.emoji} ${p.name}</span>
+        <button onclick="qadd('${p.id}');notifySet.delete('${p.id}');document.getElementById('bis-banner').classList.remove('show')" style="background:var(--g);color:#09090b;border:none;border-radius:7px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Add</button>
+      </div>` : ''; }).join('')}`;
+  }
+}
+
+// Track when notify is set
+(function() {
+  const _orig = toggleN;
+  toggleN = function(id, btn) {
+    _orig(id, btn);
+    if (notifySet.has(id)) {
+      const ts = JSON.parse(localStorage.getItem('altura_notify_ts') || '{}');
+      ts[id] = Date.now();
+      localStorage.setItem('altura_notify_ts', JSON.stringify(ts));
+    }
+  };
+})();
+
+// ═══ PULL TO REFRESH ═════════════════════════════════════════════════════════
+function addPTR(screenId, refreshFn) {
+  const el = document.getElementById(screenId);
+  if (!el) return;
+  let startY = 0, pulling = false;
+  const ind = document.createElement('div');
+  ind.className = 'ptr-indicator';
+  ind.textContent = '↓  Pull to refresh';
+  el.insertBefore(ind, el.firstChild);
+  el.addEventListener('touchstart', e => { if (el.scrollTop === 0) { startY = e.touches[0].clientY; pulling = true; } }, { passive: true });
+  el.addEventListener('touchmove', e => {
+    if (!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 60) { ind.classList.add('show'); ind.textContent = '↑  Release to refresh'; }
+    else { ind.classList.remove('show'); ind.textContent = '↓  Pull to refresh'; }
+  }, { passive: true });
+  el.addEventListener('touchend', () => {
+    if (ind.classList.contains('show')) { ind.textContent = 'Refreshing…'; refreshFn(); setTimeout(() => { ind.classList.remove('show'); ind.textContent = '↓  Pull to refresh'; }, 600); }
+    pulling = false;
+  });
+}
+
+// ═══ PAGE TRANSITIONS ════════════════════════════════════════════════════════
+const NAV_ORDER = ['home','basket','shop','history','profile'];
+(function() {
+  const _orig = goTo;
+  let _lastScreen = 'home';
+  goTo = function(id) {
+    const fromIdx = NAV_ORDER.indexOf(_lastScreen);
+    const toIdx = NAV_ORDER.indexOf(id);
+    const dir = toIdx > fromIdx ? 'slide-left' : 'slide-right';
+    const incoming = document.getElementById('sc-' + id);
+    if (incoming && _lastScreen !== id) {
+      incoming.classList.add(dir);
+      setTimeout(() => incoming.classList.remove(dir), 250);
+    }
+    _lastScreen = id;
+    _orig(id);
+  };
+})();
+
+// ═══ PATCH HOME & HISTORY RENDER ═════════════════════════════════════════════
+(function() {
+  const _origRH = renderHome;
+  renderHome = function() {
+    _origRH.apply(this, arguments);
+    renderRV();
+    renderBudget('hbudget');
+    checkBackInStock();
+  };
+})();
+
+(function() {
+  const _origRHist = renderHistory;
+  renderHistory = function() {
+    // Show orders with status first, then receipts
+    loadOrders();
+    const list = document.getElementById('hlist');
+    const activeOrders = orders.filter(o => o.status !== 'delivered');
+    const activeHtml = activeOrders.length ? `
+      <div class="hmon">Active orders</div>
+      ${activeOrders.map(o => `<div class="hitem" onclick="openOrderTracking(${o.ts})">
+        <div class="hico">📦</div>
+        <div class="hinfo">
+          <div class="hnm">${o.store}</div>
+          <div class="hdt">${fmtDate(o.ts)} · Slot: ${o.slot||'Express'}</div>
+          <div style="margin-top:3px"><span class="pill pg" style="font-size:9px;padding:2px 8px">${{placed:'Order placed',picking:'Being picked',out:'Out for delivery'}[o.status]||o.status}</span></div>
+        </div>
+        <div class="cright" style="color:var(--accent)">Track →</div>
+      </div>`).join('')}` : '';
+    _origRHist.apply(this, arguments);
+    if (activeHtml) list.insertAdjacentHTML('afterbegin', activeHtml);
+  };
+})();
+
+// ═══ INIT EXTENSIONS ═════════════════════════════════════════════════════════
+window.addEventListener('load', function() {
+  loadAP(); loadOrders(); loadRV();
+  // PTR
+  addPTR('sc-home', renderHome);
+  addPTR('sc-history', renderHistory);
+  // Budget in basket
+  const cobar = document.getElementById('cobar');
+  if (cobar) {
+    const bud = document.createElement('div');
+    bud.id = 'basket-budget';
+    bud.style.cssText = 'padding:0 16px 8px';
+    cobar.insertAdjacentElement('beforebegin', bud);
+    const _origRB = renderBasket;
+    renderBasket = function() { _origRB.apply(this, arguments); renderBudget('basket-budget'); };
+  }
+  // AP balance on home
+  setTimeout(() => {
+    const wgrid = document.querySelector('.wgrid');
+    if (wgrid && !document.getElementById('hap-bal')) {
+      const apDiv = document.createElement('div');
+      apDiv.style.cssText = 'padding:0 16px;margin-bottom:16px';
+      apDiv.innerHTML = `<div class="ap-card" onclick="openAP()" style="cursor:pointer">
+        <div class="ap-logo">A↑ ALTURA PAY</div>
+        <div class="ap-bal-label">Balance</div>
+        <div class="ap-balance" id="hap-bal">${(region?.cur||'$')}${apState.balance.toFixed(2)}</div>
+        <div class="ap-cashback">Tap to top up or view transactions</div>
+        <div class="ap-name">${(user?.name||'—').toUpperCase()}</div>
+      </div>`;
+      wgrid.closest('.sec') ? wgrid.closest('.sec').insertAdjacentElement('beforebegin', apDiv) :
+        wgrid.parentElement.insertAdjacentElement('beforebegin', apDiv);
+    }
+    // Budget on home
+    const hro = document.getElementById('hro');
+    if (hro && !document.getElementById('hbudget')) {
+      const bDiv = document.createElement('div');
+      bDiv.id = 'hbudget';
+      bDiv.style.cssText = 'padding:0 16px;margin-bottom:16px;display:none';
+      hro.closest('.sec')?.insertAdjacentElement('beforebegin', bDiv);
+    }
+    // Recently viewed section
+    if (!document.getElementById('hrv-sec')) {
+      const rvSec = document.createElement('div');
+      rvSec.id = 'hrv-sec';
+      rvSec.style.cssText = 'margin-bottom:18px;display:none';
+      rvSec.innerHTML = '<div class="slabel" style="padding:0 16px;margin-bottom:10px">Recently viewed</div><div class="rv-scroll" id="hrv"></div>';
+      const hos = document.getElementById('hos');
+      if (hos) hos.insertAdjacentElement('afterend', rvSec);
+    }
+    // Back in stock banner
+    if (!document.getElementById('bis-banner')) {
+      const bis = document.createElement('div');
+      bis.id = 'bis-banner';
+      bis.className = 'bis-banner';
+      const stcard = document.querySelector('.stcard');
+      if (stcard) stcard.insertAdjacentElement('afterend', bis);
+    }
+    renderHome();
+  }, 200);
+  // Profile: AP + budget rows
+  setTimeout(() => {
+    const profXsec = document.getElementById('prof-xsec');
+    if (profXsec && !document.getElementById('prof-ap-row')) {
+      const apRow = document.createElement('div');
+      apRow.id = 'prof-ap-row';
+      apRow.className = 'sec';
+      apRow.innerHTML = `<div class="slabel">Altura Pay</div>
+        <div class="card">
+          <div class="crow" onclick="openAP()">
+            <div class="cicon" style="background:rgba(157,219,94,.1);color:var(--g);font-family:var(--mono);font-size:12px;font-weight:700">A↑</div>
+            <div class="cinfo"><div class="ctitle">Altura Pay</div><div class="csub" id="prof-ap-bal">${(region?.cur||'$')}${apState.balance.toFixed(2)} available</div></div>
+            <div class="cright" style="color:var(--accent)">→</div>
+          </div>
+          <div class="crow" onclick="openBudgetSetter()">
+            <div class="cicon">💰</div>
+            <div class="cinfo"><div class="ctitle">Weekly budget</div><div class="csub">${getBudget() ? fmt(getBudget()) + ' per week' : 'Not set'}</div></div>
+            <div class="cright">→</div>
+          </div>
+        </div>`;
+      profXsec.insertAdjacentElement('beforebegin', apRow);
+    }
+  }, 300);
+});
+</script>
+
+<!-- NEW SHEETS -->
+<div class="sbd" id="sap" onclick="if(event.target===this)closeS('sap')"><div class="sp"></div></div>
+<div class="sbd" id="stopup" onclick="if(event.target===this)closeS('stopup')"><div class="sp"></div></div>
+<div class="sbd" id="sotrack" onclick="if(event.target===this)closeS('sotrack')"><div class="sp"></div></div>
+<div class="sbd" id="sslots" onclick="if(event.target===this)closeS('sslots')"><div class="sp"></div></div>
+<div class="sbd" id="scmp" onclick="if(event.target===this)closeS('scmp')"><div class="sp"></div></div>
+<div class="sbd" id="sbud" onclick="if(event.target===this)closeS('sbud')"><div class="sp"></div></div>
+</body>
+</html>
